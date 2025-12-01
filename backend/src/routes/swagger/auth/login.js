@@ -2,7 +2,7 @@
  * @swagger
  *
  *
- * /auth/login:
+ * /v1/auth/login:
  *  post:
  *   summary: Login existing user
  *   tags: [Auth]

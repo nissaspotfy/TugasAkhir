@@ -3,10 +3,10 @@ const {
     createProfileController,
     updateProfileController,
     getProfileController,
-} = require('../controller/user/profile');
+} = require('../../controller/user/profile');
 
-const { authMiddleware } = require('../middlewares/authorization');
-const { uploadProfilePicture } = require('../middlewares/multer');
+const { authMiddleware } = require('../../middlewares/authorization');
+const { uploadProfilePicture } = require('../../middlewares/multer');
 
 
 const router = Router()

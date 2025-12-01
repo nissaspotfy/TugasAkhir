@@ -30,7 +30,7 @@ const getProfile = async (userId) => {
     if (!userExist) {
         throw new NotFoundError('User not found');
     }
-    const profileExist = await profile.findOne({ where: { userId } });
+    const profileExist = await profile.findOne({ where: { user_id: userId } });
     if (!profileExist) {
         throw new NotFoundError('Profile not found');
     }
@@ -56,7 +56,7 @@ const createProfile = async (body, files, userId) => {
         if (!userExist) {
             throw new NotFoundError('User not found');
         }
-        const profileExist = await profile.findOne({ where: { userId } });
+        const profileExist = await profile.findOne({ where: { user_id: userId } });
         if (profileExist) {
             throw new BaseError(StatusCodes.CONFLICT, 'Profile already exists');
         }
@@ -64,7 +64,7 @@ const createProfile = async (body, files, userId) => {
         const profilePicture = files && files['profile_picture'] ? files['profile_picture'][0].path.replace(/\\/g, '/') : null;
         const profilePictureFile = profilePicture.split('/public')[1];
         const newProfile = await profile.create({
-            userId,
+            user_id: userId,
             username,
             bio,
             profilePicture: profilePictureFile,
@@ -100,7 +100,7 @@ const updateProfile = async (body, files, userId) => {
         if (!userExist) {
             throw new NotFoundError('User not found');
         }
-        const profileExist = await profile.findOne({ where: { userId } });
+        const profileExist = await profile.findOne({ where: { user_id: userId } });
         if (!profileExist) {
             throw new NotFoundError('Profile not found');
         }
@@ -122,8 +122,8 @@ const updateProfile = async (body, files, userId) => {
             bio,
             profilePicture,
             dateOfBirth,
-        }, { where: { userId } });
-        const updatedProfile = await profile.findOne({ where: { userId } });
+        }, { where: { user_id: userId } });
+        const updatedProfile = await profile.findOne({ where: { user_id: userId } });
         return updatedProfile;
     } catch (error) {
         // Handle uploaded file when an error occurs

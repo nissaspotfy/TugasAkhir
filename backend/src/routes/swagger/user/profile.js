@@ -2,7 +2,7 @@
  * @swagger
  * 
  * 
- * /user/profile:
+ * /v1/user/profile:
  *  get:
  *   summary: Get user profile
  *   tags: [User]
@@ -22,7 +22,7 @@
  * 
  * 
  * 
- * /user/create-profile:
+ * /v1/user/create-profile:
  *  post:
  *   summary: Create user profile
  *   tags: [User]
@@ -66,7 +66,7 @@
  * 
  * 
  * 
- * /user/update-profile:
+ * /v1/user/update-profile:
  *  put:
  *   summary: Update user profile
  *   tags: [User]
