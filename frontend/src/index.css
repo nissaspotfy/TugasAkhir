@@ -1,0 +1,92 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  :root {
+    /* Fonts */
+    --font-heading: "Titan One", cursive;
+    --font-body: "Nunito", sans-serif;
+
+    /* Colors */
+    --background: 40 50% 96%; /* Creamy Off-White #F9F6F0 */
+    --foreground: 180 50% 20%; /* Dark Teal Text */
+
+    --card: 0 0% 100%;
+    --card-foreground: 180 50% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 180 50% 20%;
+
+    --primary: 176 60% 35%; /* Deep Teal #238F8F */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 30 60% 92%; /* Light Beige/Peach */
+    --secondary-foreground: 176 60% 35%;
+
+    --muted: 40 30% 85%;
+    --muted-foreground: 180 20% 45%;
+
+    --accent: 25 90% 60%; /* Orange #F58634 */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 176 30% 80%;
+    --input: 176 30% 80%;
+    --ring: 176 60% 35%;
+
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 180 50% 10%;
+    --foreground: 40 50% 96%;
+    --primary: 176 60% 35%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    @apply bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Custom Utilities for Torn Paper */
+@layer utilities {
+  .torn-paper-bottom {
+    clip-path: polygon(
+      0% 0%, 100% 0%, 
+      100% 85%, 
+      95% 95%, 90% 85%, 
+      85% 95%, 80% 85%, 
+      75% 95%, 70% 85%, 
+      65% 95%, 60% 85%, 
+      55% 95%, 50% 85%, 
+      45% 95%, 40% 85%, 
+      35% 95%, 30% 85%, 
+      25% 95%, 20% 85%, 
+      15% 95%, 10% 85%, 
+      5% 95%, 0% 85%
+    );
+  }
+  
+  .torn-paper-top {
+    clip-path: polygon(
+      0% 15%, 5% 5%, 10% 15%, 
+      15% 5%, 20% 15%, 
+      25% 5%, 30% 15%, 
+      35% 5%, 40% 15%, 
+      45% 5%, 50% 15%, 
+      55% 5%, 60% 15%, 
+      65% 5%, 70% 15%, 
+      75% 5%, 80% 15%, 
+      85% 5%, 90% 15%, 
+      95% 5%, 100% 15%, 
+      100% 100%, 0% 100%
+    );
+  }
+}
