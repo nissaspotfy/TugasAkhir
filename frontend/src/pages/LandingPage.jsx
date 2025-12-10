@@ -1,49 +1,48 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent } from '../components/ui/card'
-import { ArrowRight, ShoppingBag, MapPin, Star, Utensils, Leaf, Clock, ShieldCheck, Heart } from 'lucide-react'
+import { ArrowRight, Star, Utensils, Leaf, Clock, ShieldCheck, Heart, Instagram, MessageCircle, ShoppingCart, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import Navbar from '../components/Navbar'
+import api from '../lib/api'
+import useCartStore from '../stores/cartStore'
+import { useToast } from '../components/ui/ToastProvider'
 
 export default function LandingPage() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const addItem = useCartStore((state) => state.addItem);
+  const { addToast } = useToast();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+        try {
+            const res = await api.get('/products?limit=8');
+            setProducts(res.data.data.products);
+        } catch (error) {
+            console.error("Failed to fetch products", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchProducts();
+  }, []);
+
+  const handleAddToCart = (product) => {
+      addItem(product);
+      addToast(`${product.name} berhasil ditambahkan ke keranjang!`, 'success');
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background font-sans overflow-x-hidden">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-2xl tracking-tight">
-            <div className="bg-accent p-2 rounded-full rotate-3">
-              <Utensils className="h-6 w-6 text-white" />
-            </div>
-            <span className="font-heading text-white tracking-wider">Draosan</span>
-          </div>
-          
-          <div className="hidden md:flex items-center space-x-8 font-medium text-primary-foreground/90">
-            <a href="#home" className="hover:text-accent transition-colors">Beranda</a>
-            <a href="#products" className="hover:text-accent transition-colors">Produk</a>
-            <a href="#about" className="hover:text-accent transition-colors">Tentang Kami</a>
-          </div>
-
-          <Link to="/login">
-            <Button 
-                className="bg-accent text-white hover:bg-accent/90 rounded-full px-6 font-bold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
-            >
-                Masuk
-            </Button>
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <header id="home" className="relative bg-primary pt-20 pb-40 overflow-hidden">
         {/* Floating Background Elements (Snacks) */}
         <div className="absolute inset-0 pointer-events-none">
-           {/* Top Left */}
            <img src="https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=300" className="absolute top-10 -left-10 w-40 h-40 object-cover rounded-full opacity-40 animate-pulse" style={{animationDuration: '4s'}} alt="bg-snack" />
-           {/* Top Right */}
            <img src="https://images.unsplash.com/photo-1566497014629-4f4b58f2b140?w=300" className="absolute top-20 -right-10 w-48 h-48 object-cover rounded-full opacity-40 animate-bounce" style={{animationDuration: '8s'}} alt="bg-snack" />
-           {/* Bottom Left */}
            <img src="https://images.unsplash.com/photo-1621451537084-482c73071a06?w=300" className="absolute bottom-20 left-10 w-32 h-32 object-cover rounded-full opacity-30 rotate-12" alt="bg-snack" />
-           {/* Bottom Right */}
            <img src="https://images.unsplash.com/photo-1600626337889-1045b4832d83?w=300" className="absolute bottom-40 right-20 w-36 h-36 object-cover rounded-full opacity-30 -rotate-12" alt="bg-snack" />
         </div>
 
@@ -63,11 +62,11 @@ export default function LandingPage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <Link to="/login">
+            <a href="#products">
                 <Button size="lg" className="bg-accent hover:bg-accent/90 text-white rounded-full px-10 h-16 text-xl font-heading shadow-[0_10px_40px_-10px_rgba(234,115,61,0.5)] hover:scale-105 transition-transform">
                 Belanja Sekarang
                 </Button>
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -101,37 +100,26 @@ export default function LandingPage() {
            </div>
 
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              <ProductCard 
-                title="Keripik Pisang" 
-                price="Rp 15.000" 
-                image="https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&q=80&w=500"
-                color="bg-yellow-100"
-              />
-              <ProductCard 
-                title="Basreng Pedas" 
-                price="Rp 12.000" 
-                image="https://images.unsplash.com/photo-1621451537084-482c73071a06?auto=format&fit=crop&q=80&w=500"
-                color="bg-red-100"
-              />
-              <ProductCard 
-                title="Makaroni Keju" 
-                price="Rp 10.000" 
-                image="https://images.unsplash.com/photo-1566497014629-4f4b58f2b140?auto=format&fit=crop&q=80&w=500"
-                color="bg-orange-100"
-              />
-              <ProductCard 
-                title="Sale Pisang" 
-                price="Rp 18.000" 
-                image="https://images.unsplash.com/photo-1600626337889-1045b4832d83?auto=format&fit=crop&q=80&w=500"
-                color="bg-amber-100"
-              />
+              {loading ? (
+                  <div className="col-span-full text-center py-12">Loading products...</div>
+              ) : (
+                  products.map((product) => (
+                      <ProductCard 
+                        key={product.id}
+                        product={product}
+                        onAddToCart={handleAddToCart}
+                      />
+                  ))
+              )}
            </div>
 
            <div className="mt-16 text-center">
-              <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-full px-8 h-12 font-bold text-lg transition-all">
-                 Lihat Semua Menu
-                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link to="/menu">
+                  <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-full px-8 h-12 font-bold text-lg transition-all">
+                     Lihat Semua Menu
+                     <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+              </Link>
            </div>
         </div>
       </section>
@@ -145,7 +133,7 @@ export default function LandingPage() {
                <div className="relative">
                   <div className="absolute inset-0 bg-accent rounded-[2rem] rotate-3 transform"></div>
                   <img 
-                     src="https://images.unsplash.com/photo-1612295760881-764696434667?auto=format&fit=crop&q=80&w=800" 
+                     src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600" 
                      alt="Goalpara" 
                      className="relative rounded-[2rem] shadow-2xl -rotate-2 border-4 border-white"
                   />
@@ -181,10 +169,19 @@ export default function LandingPage() {
                   <p className="text-gray-400">Cita rasa khas yang tak terlupakan.</p>
                </div>
                
-               <div className="flex gap-6">
-                  <a href="#" className="hover:text-accent transition-colors">Instagram</a>
-                  <a href="#" className="hover:text-accent transition-colors">WhatsApp</a>
-                  <a href="#" className="hover:text-accent transition-colors">Tokopedia</a>
+               <div className="flex gap-6 justify-center">
+                  <a href="javascript:void(0)" onClick={()=>addToast('Coming Soon!', 'info')} className="flex flex-col items-center hover:text-accent transition-colors">
+                     <Instagram className="w-6 h-6 mb-1" />
+                     Instagram
+                  </a>
+                  <a href="javascript:void(0)" onClick={()=>addToast('Coming Soon!', 'info')} className="flex flex-col items-center hover:text-accent transition-colors">
+                     <MessageCircle className="w-6 h-6 mb-1" />
+                     WhatsApp
+                  </a>
+                  <a href="javascript:void(0)" onClick={()=>addToast('Coming Soon!', 'info')} className="flex flex-col items-center hover:text-accent transition-colors">
+                     <ShoppingCart className="w-6 h-6 mb-1" />
+                     Tokopedia
+                  </a>
                </div>
             </div>
             <div className="mt-12 pt-8 border-t border-white/10 text-center text-gray-500 text-sm">
@@ -207,28 +204,32 @@ function FeatureItem({ icon, text }) {
    )
 }
 
-function ProductCard({ title, price, image, color }) {
+function ProductCard({ product, onAddToCart }) {
+   const color = "bg-orange-100"; 
+
    return (
-      <div className="group relative bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-border/50">
-         <div className={`h-48 ${color} relative overflow-hidden`}>
+      <div className="group relative bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-border/50 flex flex-col h-full">
+         <div className={`h-48 ${color} relative overflow-hidden flex-shrink-0`}>
              <div className="absolute inset-0 bg-black/5"></div>
              <img 
-               src={image} 
-               alt={title} 
+               src={product.image_url || 'https://placehold.co/500'} 
+               alt={product.name} 
                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
              />
          </div>
-         <div className="p-6 relative">
+         <div className="p-6 relative flex flex-col flex-1">
             <div className="absolute -top-6 right-4 bg-accent text-white px-4 py-1 rounded-full text-sm font-bold shadow-md">
-               {price}
+               Rp {product.price.toLocaleString()}
             </div>
-            <h3 className="font-heading text-xl mb-2 text-foreground">{title}</h3>
-            <p className="text-muted-foreground text-sm mb-4">Gurih, renyah, dan bikin nagih!</p>
-            <Link to="/login">
-                <Button className="w-full rounded-full bg-primary hover:bg-primary/90 font-bold">
-                Pesan Sekarang
-                </Button>
-            </Link>
+            <h3 className="font-heading text-xl mb-2 text-foreground">{product.name}</h3>
+            <p className="text-muted-foreground text-sm mb-4 line-clamp-2 flex-1">{product.description || 'Gurih, renyah, dan bikin nagih!'}</p>
+            
+            <Button 
+                onClick={() => onAddToCart(product)}
+                className="w-full rounded-full bg-primary hover:bg-primary/90 font-bold mt-auto"
+            >
+                Tambah ke Keranjang
+            </Button>
          </div>
       </div>
    )

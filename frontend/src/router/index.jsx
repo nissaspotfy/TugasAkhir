@@ -3,6 +3,8 @@ import LandingPage from '../pages/LandingPage';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import Dashboard from '../pages/Dashboard';
+import Checkout from '../pages/Checkout';
+import Menu from '../pages/Menu';
 import PrivateRoute from '../components/PrivateRoute'; 
 
 const AppRouter = () => {
@@ -10,6 +12,7 @@ const AppRouter = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/menu" element={<Menu />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
@@ -18,6 +21,14 @@ const AppRouter = () => {
           element={
             <PrivateRoute>
               <Dashboard />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/checkout" 
+          element={
+            <PrivateRoute>
+              <Checkout />
             </PrivateRoute>
           } 
         />
