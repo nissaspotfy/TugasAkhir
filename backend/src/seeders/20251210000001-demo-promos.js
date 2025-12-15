@@ -1,9 +1,11 @@
 'use strict';
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.bulkInsert('promos', [
       {
+        id: uuidv4(),
         code: 'DISKON10',
         discount_type: 'percentage',
         discount_value: 10, // 10%
@@ -13,6 +15,7 @@ module.exports = {
         updatedAt: new Date()
       },
       {
+        id: uuidv4(),
         code: 'HEMAT5000',
         discount_type: 'fixed',
         discount_value: 5000, // Rp 5000
@@ -22,6 +25,7 @@ module.exports = {
         updatedAt: new Date()
       },
       {
+        id: uuidv4(),
         code: 'MERDEKA',
         discount_type: 'percentage',
         discount_value: 17, // 17%

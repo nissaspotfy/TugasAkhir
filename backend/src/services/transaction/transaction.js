@@ -1,11 +1,13 @@
-const { Transaction, TransactionItem, Product, Promo, sequelize } = require('../../models');
+const { Transaction, TransactionItem, Product, Promo, Address, sequelize } = require('../../models');
 const { BaseError, NotFoundError, BadRequestError } = require('../../common/responses/error-response');
 const { StatusCodes } = require('http-status-codes');
 const snap = require('../../common/utils/midtrans');
 const { v4: uuidv4 } = require('uuid');
+const shippingService = require('../shipping/shipping');
 
-const createTransaction = async (user, items, promoCode) => {
-    // items: [{ productId: 1, quantity: 2 }]
+const createTransaction = async (user, items, promoCode, shippingAddressId, shippingOption) => {
+    // items: [{ productId: 1, quantity: 2, note: "..." }]
+    // shippingOption: { provider: 'JNE', service: 'REG', cost: 10000 }
     
     const t = await sequelize.transaction();
 
@@ -15,6 +17,7 @@ const createTransaction = async (user, items, promoCode) => {
 
         // 1. Validate products and calculate total
         for (const item of items) {
+            // ... (rest of loop same) ...
             const product = await Product.findByPk(item.productId, { transaction: t });
             if (!product) {
                 throw new NotFoundError(`Product with ID ${item.productId} not found`);
@@ -31,14 +34,35 @@ const createTransaction = async (user, items, promoCode) => {
                 product_id: product.id,
                 quantity: item.quantity,
                 price_at_time: price,
-                name: product.name // Use actual product name
+                name: product.name, 
+                note: item.note 
             });
 
             // Decrease stock
             await product.update({ stock: product.stock - item.quantity }, { transaction: t });
         }
 
+        // Validate Shipping Option
+        let shippingCost = 0;
+        if (shippingAddressId && shippingOption) {
+            const shippingResult = await shippingService.calculateShippingCost(shippingAddressId, items);
+            const validOption = shippingResult.options.find(opt => 
+                opt.provider === shippingOption.provider && 
+                opt.service === shippingOption.service
+            );
+
+            if (!validOption) {
+                throw new BaseError(StatusCodes.BAD_REQUEST, 'Invalid shipping option selected');
+            }
+            
+            // Use server-calculated cost to prevent tampering
+            shippingCost = validOption.cost;
+        } else {
+             throw new BaseError(StatusCodes.BAD_REQUEST, 'Shipping address and option required');
+        }
+
         // 2. Apply Promo Code if exists
+        // ... (promo logic same) ...
         let discountAmount = 0;
         let promoId = null;
 
@@ -53,8 +77,6 @@ const createTransaction = async (user, items, promoCode) => {
 
             if (promo) {
                 if (promo.max_usage !== null && promo.max_usage <= 0) {
-                     // Promo invalid or used up, maybe throw error or just ignore?
-                     // Let's throw error to inform user
                      throw new BaseError(StatusCodes.BAD_REQUEST, 'Promo code usage limit reached');
                 }
 
@@ -68,7 +90,6 @@ const createTransaction = async (user, items, promoCode) => {
 
                 promoId = promo.id;
 
-                // Decrement max_usage if applicable
                 if (promo.max_usage !== null) {
                     await promo.update({ max_usage: promo.max_usage - 1 }, { transaction: t });
                 }
@@ -77,7 +98,7 @@ const createTransaction = async (user, items, promoCode) => {
             }
         }
 
-        const finalAmount = totalAmount - discountAmount;
+        const finalAmount = (totalAmount - discountAmount) + shippingCost;
 
         // 3. Create Transaction Record
         const transaction = await Transaction.create({
@@ -85,28 +106,44 @@ const createTransaction = async (user, items, promoCode) => {
             total_amount: finalAmount,
             status: 'pending',
             promo_id: promoId,
-            discount_amount: discountAmount
+            discount_amount: discountAmount,
+            shipping_cost: shippingCost,
+            shipping_address_id: shippingAddressId,
+            shipping_provider: shippingOption.provider,
+            shipping_service: shippingOption.service
         }, { transaction: t });
 
         // 4. Create Transaction Items
+        // ... (rest same) ...
         const itemsWithId = transactionItemsData.map(item => ({
             product_id: item.product_id,
             quantity: item.quantity,
             price_at_time: item.price_at_time,
-            transaction_id: transaction.id
+            transaction_id: transaction.id,
+            note: item.note 
         }));
         await TransactionItem.bulkCreate(itemsWithId, { transaction: t });
 
         // 5. Call Midtrans
-        // Ensure a unique order ID for Midtrans
-        const orderId = `ORDER-${transaction.id}-${Date.now()}`;
+        // Midtrans order_id limit is 50 chars. UUID is 36 chars.
+        // ORDER- (6) + UUID (36) = 42 chars.
+        const orderId = `ORDER-${transaction.id}`;
         
         const midtransItems = transactionItemsData.map(item => ({
-            id: item.product_id.toString(), // Midtrans id should be string
+            id: item.product_id.toString(),
             price: item.price_at_time,
             quantity: item.quantity,
-            name: item.name.substring(0, 50) // Midtrans name limit
+            name: item.name.substring(0, 50)
         }));
+
+        if (shippingCost > 0) {
+            midtransItems.push({
+                id: 'SHIPPING',
+                price: shippingCost,
+                quantity: 1,
+                name: 'Shipping Cost'
+            });
+        }
 
         if (discountAmount > 0) {
             midtransItems.push({
@@ -131,7 +168,6 @@ const createTransaction = async (user, items, promoCode) => {
 
         let snapToken = null;
         try {
-             // Check if server key is set, otherwise skip real call or use dummy
              if (process.env.MIDTRANS_SERVER_KEY) {
                  const midtransTransaction = await snap.createTransaction(parameter);
                  snapToken = midtransTransaction.token;
@@ -141,11 +177,8 @@ const createTransaction = async (user, items, promoCode) => {
              }
         } catch (midtransError) {
              console.error("Midtrans Error:", midtransError);
-             // Fail gracefully or throw? 
-             // If payment init fails, transaction might be stuck.
-             // For now, allow it but status is pending.
-             // Or throw to rollback.
-             throw new BaseError(StatusCodes.INTERNAL_SERVER_ERROR, 'Payment gateway initialization failed');
+             const errorMessage = midtransError.ApiResponse ? JSON.stringify(midtransError.ApiResponse) : midtransError.message;
+             throw new BaseError(StatusCodes.INTERNAL_SERVER_ERROR, `Payment gateway initialization failed: ${errorMessage}`);
         }
 
         await transaction.update({ snap_token: snapToken }, { transaction: t });
@@ -155,9 +188,10 @@ const createTransaction = async (user, items, promoCode) => {
         return {
             transactionId: transaction.id,
             snapToken,
-            totalAmount: finalAmount, // Return the discounted amount
+            totalAmount: finalAmount, 
             originalAmount: totalAmount,
             discountAmount,
+            shippingCost,
             status: transaction.status
         };
 

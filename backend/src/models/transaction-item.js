@@ -16,10 +16,17 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   TransactionItem.init({
-    transaction_id: DataTypes.INTEGER,
-    product_id: DataTypes.INTEGER,
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: false
+    },
+    transaction_id: DataTypes.UUID,
+    product_id: DataTypes.UUID,
     quantity: DataTypes.INTEGER,
-    price_at_time: DataTypes.INTEGER
+    price_at_time: DataTypes.INTEGER,
+    note: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'TransactionItem',

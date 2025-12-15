@@ -8,8 +8,8 @@ const {
 const createTransactionController = async (req, res, next) => {
     try {
         // req.user is populated by authorization middleware
-        const { items, promoCode } = req.body; 
-        const result = await createTransaction(req.user, items, promoCode);
+        const { items, promoCode, shippingAddressId, shippingOption } = req.body; 
+        const result = await createTransaction(req.user, items, promoCode, shippingAddressId, shippingOption);
         return res.status(StatusCodes.CREATED).json(
             new BaseResponse({
                 status: StatusCodes.CREATED,

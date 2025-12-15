@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button } from '../components/ui/button'
 import { ArrowRight, Star, Utensils, Leaf, Clock, ShieldCheck, Heart, Instagram, MessageCircle, ShoppingCart, MapPin } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import api from '../lib/api'
 import useCartStore from '../stores/cartStore'
@@ -12,6 +12,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,9 +28,19 @@ export default function LandingPage() {
     fetchProducts();
   }, []);
 
-  const handleAddToCart = (product) => {
-      addItem(product);
-      addToast(`${product.name} berhasil ditambahkan ke keranjang!`, 'success');
+  const handleAddToCart = async (product) => {
+      try {
+          await addItem(product);
+          addToast(`${product.name} berhasil ditambahkan ke keranjang!`, 'success');
+      } catch (error) {
+          if (error.message === "Login required to add items to cart.") {
+              addToast("Anda harus login untuk menambahkan produk ke keranjang.", 'error');
+              navigate('/login');
+          } else {
+              addToast(`Gagal menambahkan ${product.name} ke keranjang.`, 'error');
+              console.error("Add to cart error:", error);
+          }
+      }
   };
 
   return (

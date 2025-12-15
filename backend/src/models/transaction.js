@@ -5,6 +5,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Transaction extends Model {
     static associate(models) {
+      // define association here
       Transaction.belongsTo(models.user, {
         foreignKey: 'user_id',
         as: 'user'
@@ -17,15 +18,44 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'promo_id',
         as: 'promo'
       });
+      Transaction.belongsTo(models.Address, {
+        foreignKey: 'shipping_address_id',
+        as: 'shippingAddress'
+      });
     }
   }
   Transaction.init({
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: false
+    },
     user_id: DataTypes.UUID,
-    total_amount: DataTypes.INTEGER,
-    status: DataTypes.ENUM('pending', 'paid', 'failed', 'cancelled'),
-    snap_token: DataTypes.STRING,
-    promo_id: DataTypes.INTEGER,
-    discount_amount: DataTypes.INTEGER
+    total_amount: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    shipping_cost: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    shipping_address_id: {
+      type: DataTypes.UUID,
+      allowNull: true
+    },
+    shipping_provider: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    shipping_service: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    status: {
+      type: DataTypes.ENUM('pending', 'completed', 'cancelled'),
+      defaultValue: 'pending'
+    }
   }, {
     sequelize,
     modelName: 'Transaction',

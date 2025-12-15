@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Promo.init({
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: false
+    },
     code: {
       type: DataTypes.STRING,
       allowNull: false,

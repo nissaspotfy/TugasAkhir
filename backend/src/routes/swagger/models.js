@@ -2,6 +2,56 @@
  * @swagger
  * components:
  *   schemas:
+ *     Address:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         user_id:
+ *           type: string
+ *           format: uuid
+ *         recipient_name:
+ *           type: string
+ *         phone_number:
+ *           type: string
+ *         address_line:
+ *           type: string
+ *         city:
+ *           type: string
+ *         postal_code:
+ *           type: string
+ *         latitude:
+ *           type: number
+ *         longitude:
+ *           type: number
+ *         is_primary:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     CartItem:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         user_id:
+ *           type: string
+ *           format: uuid
+ *         product_id:
+ *           type: integer
+ *         quantity:
+ *           type: integer
+ *         product:
+ *           $ref: '#/components/schemas/Product'
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  *     Product:
  *       type: object
  *       properties:
@@ -59,6 +109,12 @@
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/TransactionItemRequest'
+ *         promoCode:
+ *           type: string
+ *         note:
+ *           type: string
+ *         shippingAddressId:
+ *           type: integer
  *
  *     TransactionResponse:
  *       type: object

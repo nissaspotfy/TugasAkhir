@@ -7,9 +7,22 @@ const api = axios.create({
   },
 });
 
+export const setAuthToken = (token) => {
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common['Authorization'];
+  }
+};
+
 // Add a request interceptor to include the token if it exists
 api.interceptors.request.use(
   (config) => {
+    // Check if Authorization header is already set (by setAuthToken)
+    if (config.headers.Authorization) {
+      return config;
+    }
+
     const state = JSON.parse(localStorage.getItem('auth-storage') || '{}');
     const token = state.state?.token;
     

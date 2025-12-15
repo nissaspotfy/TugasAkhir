@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import api from '../lib/api'
+import api, { setAuthToken } from '../lib/api'
 
 const useAuthStore = create(
   devtools(
@@ -14,17 +14,24 @@ const useAuthStore = create(
 
         setUser: (user) => set({ user, isAuthenticated: true }),
         
-        setToken: (token) => set({ token }),
+        setToken: (token) => {
+            setAuthToken(token);
+            set({ token });
+        },
         
         login: async (email, password) => {
             set({ isLoading: true, error: null });
             try {
                 const response = await api.post('/auth/login', { email, password });
                 const data = response.data;
+                const token = data.data.token;
+
+                // Set token immediately for subsequent requests
+                setAuthToken(token);
 
                 set({ 
                     user: data.data, 
-                    token: data.data.token, 
+                    token: token, 
                     isAuthenticated: true,
                     isLoading: false 
                 });
@@ -47,12 +54,15 @@ const useAuthStore = create(
             }
         },
         
-        logout: () => set({ 
-          user: null, 
-          token: null, 
-          isAuthenticated: false,
-          error: null
-        }),
+        logout: () => {
+          setAuthToken(null);
+          set({ 
+            user: null, 
+            token: null, 
+            isAuthenticated: false,
+            error: null
+          })
+        },
         
         updateUser: (userData) => set((state) => ({ 
           user: { ...state.user, ...userData } 

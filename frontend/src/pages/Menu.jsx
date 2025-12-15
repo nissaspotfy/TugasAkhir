@@ -1,21 +1,54 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../lib/api';
 import useCartStore from '../stores/cartStore';
 import { Button } from '../components/ui/button';
 import { useToast } from '../components/ui/ToastProvider';
+import { Search } from 'lucide-react';
 
 export default function Menu() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Semua');
+  const [categories, setCategories] = useState(['Semua']); // State for dynamic categories
+  
   const addItem = useCartStore((state) => state.addItem);
   const { addToast } = useToast();
+  const navigate = useNavigate();
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+        try {
+            const res = await api.get('/categories');
+            const categoryNames = res.data.data.map(cat => cat.name);
+            setCategories(['Semua', ...categoryNames]);
+        } catch (error) {
+            console.error("Failed to fetch categories", error);
+        }
+    };
+    fetchCategories();
+  }, []); // Run once on mount
 
   useEffect(() => {
     const fetchProducts = async () => {
+        setLoading(true);
         try {
-            // Ideally support pagination logic here too
-            const res = await api.get('/products?limit=100'); 
+            const params = { limit: 100 };
+            if (debouncedSearch) params.search = debouncedSearch;
+            if (selectedCategory !== 'Semua') params.category = selectedCategory;
+
+            const res = await api.get('/products', { params });
             setProducts(res.data.data.products);
         } catch (error) {
             console.error("Failed to fetch products", error);
@@ -24,11 +57,21 @@ export default function Menu() {
         }
     };
     fetchProducts();
-  }, []);
+  }, [debouncedSearch, selectedCategory]);
 
-  const handleAddToCart = (product) => {
-      addItem(product);
-      addToast(`${product.name} berhasil ditambahkan ke keranjang!`, 'success');
+  const handleAddToCart = async (product) => {
+      try {
+          await addItem(product);
+          addToast(`${product.name} berhasil ditambahkan ke keranjang!`, 'success');
+      } catch (error) {
+          if (error.message === "Login required to add items to cart.") {
+              addToast("Anda harus login untuk menambahkan produk ke keranjang.", 'error');
+              navigate('/login'); // Redirect to login page
+          } else {
+              addToast(`Gagal menambahkan ${product.name} ke keranjang.`, 'error');
+              console.error("Add to cart error:", error);
+          }
+      }
   };
 
   return (
@@ -38,9 +81,46 @@ export default function Menu() {
         <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <h1 className="font-heading text-4xl text-primary mb-8 text-center">Menu Kami</h1>
             
+            {/* Filters */}
+            <div className="mb-10 flex flex-col md:flex-row gap-4 justify-between items-center">
+                {/* Categories */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`px-4 py-2 rounded-full font-medium transition-all ${
+                                selectedCategory === cat 
+                                ? 'bg-primary text-white shadow-md' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Search */}
+                <div className="relative w-full md:w-64">
+                    <input 
+                        type="text" 
+                        placeholder="Cari makanan..." 
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                </div>
+            </div>
+
+            {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {loading ? (
-                  <div className="col-span-full text-center py-12">Loading products...</div>
+                  <div className="col-span-full text-center py-12 text-gray-500">Memuat menu lezat...</div>
+              ) : products.length === 0 ? (
+                  <div className="col-span-full text-center py-12 text-gray-500">
+                      Tidak ada produk ditemukan untuk "{debouncedSearch || selectedCategory}".
+                  </div>
               ) : (
                   products.map((product) => (
                       <ProductCard 

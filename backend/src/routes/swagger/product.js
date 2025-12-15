@@ -16,10 +16,16 @@
  *           type: string
  *         description: Filter by category
  *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter products by category name (e.g., "Indonesia")
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:

@@ -7,7 +7,7 @@ import useCartStore from '../stores/cartStore';
 
 export default function Navbar() {
   const { isAuthenticated, logout } = useAuthStore();
-  const { items, removeItem, getTotalPrice, getItemCount } = useCartStore();
+  const { items, removeItem, getTotalPrice, getItemCount, clearCart } = useCartStore();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cartRef = useRef(null);
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
       logout();
+      clearCart();
       navigate('/login');
   };
 

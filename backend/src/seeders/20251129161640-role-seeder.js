@@ -1,27 +1,19 @@
 'use strict';
+const { v4: uuidv4 } = require('uuid');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-    */
     await queryInterface.bulkInsert('Roles', [
       {
-        id: Sequelize.literal('UUID()'),
+        id: '1f816432-f7b4-4e3a-9c7a-8727276568d1', // Admin
         nama_role: 'Admin',
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
-        id: Sequelize.literal('UUID()'),
-        nama_role: 'User',
+        id: '2f816432-f7b4-4e3a-9c7a-8727276568d2', // Customer/User
+        nama_role: 'User', // Renaming to Customer for clarity
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -29,11 +21,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
+    await queryInterface.bulkDelete('Roles', null, {});
   }
 };
