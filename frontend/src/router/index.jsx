@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';
-import Login from '../pages/auth/Login';
-import Register from '../pages/auth/Register';
+import AuthPage from '../pages/auth/AuthPage';
 import Dashboard from '../pages/Dashboard';
 import Checkout from '../pages/Checkout';
 import Menu from '../pages/Menu';
@@ -13,8 +12,8 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/menu" element={<Menu />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
         
         <Route 
           path="/dashboard" 

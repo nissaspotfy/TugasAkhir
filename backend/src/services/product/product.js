@@ -1,4 +1,4 @@
-const { Product } = require('../../models');
+const { Product, Category } = require('../../models');
 const { BaseError, NotFoundError } = require('../../common/responses/error-response');
 const { StatusCodes } = require('http-status-codes');
 const { Op } = require('sequelize');
@@ -6,13 +6,19 @@ const { Op } = require('sequelize');
 const getAllProducts = async (query) => {
     const { search, category, limit, page } = query;
     const where = {};
+    const include = [{
+        model: Category,
+        as: 'category',
+        attributes: ['name', 'slug']
+    }];
     
     if (search) {
         where.name = { [Op.like]: `%${search}%` };
     }
     
     if (category) {
-        where.category = category;
+        // Filter by category name via association
+        include[0].where = { name: category };
     }
 
     const pageNum = parseInt(page) || 1;
@@ -21,6 +27,7 @@ const getAllProducts = async (query) => {
 
     const products = await Product.findAndCountAll({
         where,
+        include,
         limit: limitNum,
         offset,
         order: [['createdAt', 'DESC']]
