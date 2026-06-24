@@ -3,7 +3,9 @@ const { StatusCodes } = require('http-status-codes');
 const {
     getAllProducts,
     getProductById,
-    createProduct
+    createProduct,
+    updateProduct,
+    deleteProduct
 } = require('../../services/product/product');
 
 const getProductsController = async (req, res, next) => {
@@ -39,8 +41,7 @@ const getProductByIdController = async (req, res, next) => {
 
 const createProductController = async (req, res, next) => {
     try {
-        // Ideally add Joi validation here
-        const result = await createProduct(req.body);
+        const result = await createProduct(req.body, req.file);
         return res.status(StatusCodes.CREATED).json(
             new BaseResponse({
                 status: StatusCodes.CREATED,
@@ -53,8 +54,42 @@ const createProductController = async (req, res, next) => {
     }
 };
 
+const updateProductController = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await updateProduct(id, req.body, req.file);
+        return res.status(StatusCodes.OK).json(
+            new BaseResponse({
+                status: StatusCodes.OK,
+                message: 'Product updated successfully',
+                data: result,
+            })
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
+const deleteProductController = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await deleteProduct(id);
+        return res.status(StatusCodes.OK).json(
+            new BaseResponse({
+                status: StatusCodes.OK,
+                message: 'Product deleted successfully',
+                data: result,
+            })
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getProductsController,
     getProductByIdController,
-    createProductController
+    createProductController,
+    updateProductController,
+    deleteProductController
 };

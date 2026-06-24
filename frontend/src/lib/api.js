@@ -23,7 +23,8 @@ api.interceptors.request.use(
       return config;
     }
 
-    const state = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+    const key = window.location.pathname.startsWith('/admin') ? 'admin-auth-storage' : 'customer-auth-storage';
+    const state = JSON.parse(localStorage.getItem(key) || '{}');
     const token = state.state?.token;
     
     if (token) {
@@ -32,6 +33,21 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor to handle 401 Unauthorized errors (session expired)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const key = window.location.pathname.startsWith('/admin') ? 'admin-auth-storage' : 'customer-auth-storage';
+      localStorage.removeItem(key);
+      localStorage.removeItem('adminActiveTab');
+      localStorage.removeItem('customerActiveTab');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );

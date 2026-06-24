@@ -23,6 +23,18 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id',
         as: 'transactions'
       });
+      user.hasMany(models.Address, {
+        foreignKey: 'user_id',
+        as: 'addresses'
+      });
+      user.hasMany(models.review, {
+        foreignKey: 'user_id',
+        as: 'reviews'
+      });
+      user.hasMany(models.Notification, {
+        foreignKey: 'user_id',
+        as: 'notifications'
+      });
     }
   }
   user.init({
@@ -52,6 +64,14 @@ module.exports = (sequelize, DataTypes) => {
         model: 'role',
         key: 'id'
       }
+    },
+    reset_code: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    reset_expires_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   }, {
     sequelize,

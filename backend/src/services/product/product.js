@@ -2,6 +2,8 @@ const { Product, Category } = require('../../models');
 const { BaseError, NotFoundError } = require('../../common/responses/error-response');
 const { StatusCodes } = require('http-status-codes');
 const { Op } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
 
 const getAllProducts = async (query) => {
     const { search, category, limit, page } = query;
@@ -33,8 +35,16 @@ const getAllProducts = async (query) => {
         order: [['createdAt', 'DESC']]
     });
 
+    const rows = products.rows.map(p => {
+        const productVal = p.get({ plain: true });
+        if (productVal.image_url && productVal.image_url.startsWith('/')) {
+            productVal.image_url = `${process.env.BASE_URL}${productVal.image_url}`;
+        }
+        return productVal;
+    });
+
     return {
-        products: products.rows,
+        products: rows,
         total: products.count,
         page: pageNum,
         totalPages: Math.ceil(products.count / limitNum)
@@ -46,17 +56,65 @@ const getProductById = async (id) => {
     if (!product) {
         throw new NotFoundError('Product not found');
     }
+    const productVal = product.get({ plain: true });
+    if (productVal.image_url && productVal.image_url.startsWith('/')) {
+        productVal.image_url = `${process.env.BASE_URL}${productVal.image_url}`;
+    }
+    return productVal;
+};
+
+const createProduct = async (data, file) => {
+    if (file) {
+        const filePath = file.path.replace(/\\/g, '/');
+        const relativePath = filePath.split('/public')[1];
+        data.image_url = relativePath;
+    }
+    if (!data.category_id) {
+        const firstCategory = await Category.findOne();
+        if (firstCategory) {
+            data.category_id = firstCategory.id;
+        }
+    }
+    const product = await Product.create(data);
     return product;
 };
 
-const createProduct = async (data) => {
-    // Basic validation could go here or in controller/Joi
-    const product = await Product.create(data);
+const updateProduct = async (id, data, file) => {
+    const product = await Product.findByPk(id);
+    if (!product) {
+        throw new NotFoundError('Product not found');
+    }
+
+    if (file) {
+        // delete old product image if it exists
+        if (product.image_url && product.image_url.startsWith('/')) {
+            const oldImagePath = path.join(process.cwd(), 'public', product.image_url);
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+        }
+        const filePath = file.path.replace(/\\/g, '/');
+        const relativePath = filePath.split('/public')[1];
+        data.image_url = relativePath;
+    }
+
+    await product.update(data);
     return product;
+};
+
+const deleteProduct = async (id) => {
+    const product = await Product.findByPk(id);
+    if (!product) {
+        throw new NotFoundError('Product not found');
+    }
+    await product.destroy({ force: true });
+    return { id };
 };
 
 module.exports = {
     getAllProducts,
     getProductById,
-    createProduct
+    createProduct,
+    updateProduct,
+    deleteProduct
 };

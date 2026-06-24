@@ -4,8 +4,9 @@ const {
     updateProfileController,
     getProfileController,
 } = require('../../controller/user/profile');
+const { getAllCustomersController, deleteUserAccountController } = require('../../controller/user/user');
 
-const { authMiddleware } = require('../../middlewares/authorization');
+const { authMiddleware, adminMiddleware } = require('../../middlewares/authorization');
 const { uploadProfilePicture } = require('../../middlewares/multer');
 
 
@@ -15,6 +16,10 @@ const router = Router()
 router.get('/profile', [authMiddleware], getProfileController)
 router.post('/create-profile', [authMiddleware, uploadProfilePicture.fields([{name: 'profile_picture', maxCount: 1}])], createProfileController)
 router.put('/update-profile', [authMiddleware, uploadProfilePicture.fields([{name: 'profile_picture', maxCount: 1}])], updateProfileController)
+
+//admin routes
+router.get('/', [authMiddleware, adminMiddleware], getAllCustomersController)
+router.delete('/delete-account', authMiddleware, deleteUserAccountController)
 
 
 module.exports = router

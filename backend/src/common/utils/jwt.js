@@ -10,7 +10,7 @@ const { JWT_SECRET } = process.env;
  * @returns {string} - The generated JWT token
  */
 
-const generateToken = (payload, secret = JWT_SECRET, expiresIn = '12h') => {
+const generateToken = (payload, secret = JWT_SECRET, expiresIn = '24h') => {
      try {
         return jwt.sign(payload, secret, { expiresIn });
      } catch (error) {

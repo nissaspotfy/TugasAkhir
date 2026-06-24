@@ -32,7 +32,12 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 100
     },
     category_id: DataTypes.UUID, // Changed from category string
-    image_url: DataTypes.STRING
+    image_url: DataTypes.STRING,
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'aktif',
+      allowNull: false
+    }
   }, {
     sequelize,
     modelName: 'Product',

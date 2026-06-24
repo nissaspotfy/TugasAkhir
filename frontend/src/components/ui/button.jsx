@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 const Button = React.forwardRef(({ className, variant = "default", size = "default", ...props }, ref) => {
   const variants = {
-    default: "bg-primary text-primary-foreground hover:bg-primary/90",
+    default: "bg-gradient-to-r from-[#B91C1C] via-[#E11D48] to-[#F59E0B] hover:from-[#9c1818] hover:via-[#c7173e] hover:to-[#db8c0a] text-white transition-all duration-300 font-bold shadow-md hover:scale-[1.02] active:scale-[0.98]",
     destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
     outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
     secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",

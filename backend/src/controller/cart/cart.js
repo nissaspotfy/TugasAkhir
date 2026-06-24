@@ -1,6 +1,8 @@
 const BaseResponse = require('../../common/responses/base-response');
 const { StatusCodes } = require('http-status-codes');
 const cartService = require('../../services/cart/cart');
+const { Product } = require('../../models');
+const { BaseError } = require('../../common/responses/error-response');
 
 const getCart = async (req, res, next) => {
     try {
@@ -20,6 +22,17 @@ const getCart = async (req, res, next) => {
 const addToCart = async (req, res, next) => {
     try {
         const { productId, quantity } = req.body;
+
+        // SELECT stock FROM products WHERE id = ?
+        const product = await Product.findByPk(productId);
+        if (!product) {
+            throw new BaseError(StatusCodes.NOT_FOUND, 'Produk tidak ditemukan');
+        }
+
+        if (product.stock === null || product.stock <= 0) {
+            throw new BaseError(StatusCodes.BAD_REQUEST, 'Stok menu ini habis');
+        }
+
         const result = await cartService.addToCart(req.user.id, productId, quantity);
         return res.status(StatusCodes.OK).json(
             new BaseResponse({
@@ -64,9 +77,24 @@ const removeFromCart = async (req, res, next) => {
     }
 };
 
+const clearCart = async (req, res, next) => {
+    try {
+        await cartService.clearCart(req.user.id);
+        return res.status(StatusCodes.OK).json(
+            new BaseResponse({
+                status: StatusCodes.OK,
+                message: 'Cart cleared successfully',
+            })
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getCart,
     addToCart,
     updateCartItem,
-    removeFromCart
+    removeFromCart,
+    clearCart
 };

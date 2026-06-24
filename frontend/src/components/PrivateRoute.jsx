@@ -1,15 +1,44 @@
 import { Navigate } from 'react-router-dom';
-import useAuthStore from '../stores/authStore';
+import { useState, useEffect } from 'react';
+import useAuthStore, { getUserRole } from '../stores/authStore';
+import { Loader2 } from 'lucide-react';
 
-const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useAuthStore();
+const PrivateRoute = ({ children, allowedRoles }) => {
+  const { isAuthenticated, user } = useAuthStore();
+  const [isHydrated, setIsHydrated] = useState(useAuthStore.persist.hasHydrated());
+
+  useEffect(() => {
+    if (useAuthStore.persist.hasHydrated()) {
+      setIsHydrated(true);
+      return;
+    }
+    const unsub = useAuthStore.persist.onFinishHydration(() => {
+      setIsHydrated(true);
+    });
+    return () => unsub();
+  }, []);
+
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to when they were redirected. This allows us to send them
-    // along to that page after they login, which is a nicer user experience
-    // than dropping them off on the home page.
     return <Navigate to="/login" replace />;
+  }
+
+  // Determine user's role using the standardized helper
+  const normalizedUserRole = getUserRole(user);
+  const normalizedAllowedRoles = allowedRoles ? allowedRoles.map(r => r.toLowerCase()) : [];
+
+  if (allowedRoles && !normalizedAllowedRoles.includes(normalizedUserRole)) {
+    if (normalizedUserRole === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    return <Navigate to="/" replace />;
   }
 
   return children;

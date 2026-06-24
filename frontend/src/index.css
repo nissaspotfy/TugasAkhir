@@ -3,94 +3,110 @@
 
 @layer base {
   :root {
-    /* Fonts */
-    --font-heading: "Titan One", cursive;
-    --font-body: "Nunito", sans-serif;
+    /* Fonts requested: Poppins */
+    --font-heading: "Poppins", sans-serif;
+    --font-body: "Poppins", sans-serif;
 
-    /* Colors */
-    --background: 40 50% 96%; /* Creamy Off-White #F9F6F0 */
-    --foreground: 180 50% 20%; /* Dark Teal Text */
+    /* Colors requested: Background Putih, Accent #bf3843 */
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 0 0% 10%;  
 
     --card: 0 0% 100%;
-    --card-foreground: 180 50% 20%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 180 50% 20%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 176 60% 35%; /* Deep Teal #238F8F */
-    --primary-foreground: 0 0% 98%;
+    /* Accent color: #B91C1C (approx HSL: 0 74% 42%) */
+    --primary: 0 74% 42%; 
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 60% 92%; /* Light Beige/Peach */
-    --secondary-foreground: 176 60% 35%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 74% 42%;
 
-    --muted: 40 30% 85%;
-    --muted-foreground: 180 20% 45%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 25 90% 60%; /* Orange #F58634 */
-    --accent-foreground: 0 0% 98%;
+    --accent: 0 74% 42%; 
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 176 30% 80%;
-    --input: 176 30% 80%;
-    --ring: 176 60% 35%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 74% 42%;
 
-    --radius: 1rem;
+    --radius: 5px;
   }
 
   .dark {
-    --background: 180 50% 10%;
-    --foreground: 40 50% 96%;
-    --primary: 176 60% 35%;
+    --background: 0 0% 10%;
+    --foreground: 0 0% 100%;
+    --primary: 355 54% 48%;
   }
 
   html {
     scroll-behavior: smooth;
   }
 
-  body {
-    font-family: var(--font-body);
-    @apply bg-background text-foreground;
+  * {
+    font-family: 'Poppins', sans-serif !important;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-weight: 600;
   }
 }
 
-/* Custom Utilities for Torn Paper */
-@layer utilities {
-  .torn-paper-bottom {
-    clip-path: polygon(
-      0% 0%, 100% 0%, 
-      100% 85%, 
-      95% 95%, 90% 85%, 
-      85% 95%, 80% 85%, 
-      75% 95%, 70% 85%, 
-      65% 95%, 60% 85%, 
-      55% 95%, 50% 85%, 
-      45% 95%, 40% 85%, 
-      35% 95%, 30% 85%, 
-      25% 95%, 20% 85%, 
-      15% 95%, 10% 85%, 
-      5% 95%, 0% 85%
-    );
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Crimson Spark / Ruby Aurora gradient styling */
+@utility bg-crimson-spark {
+  background: linear-gradient(135deg, #B91C1C 0%, #E11D48 50%, #F59E0B 100%) !important;
+  color: #ffffff !important;
+}
+@utility bg-crimson-spark-hover {
+  &:hover {
+    background: linear-gradient(135deg, #a11818 0%, #c7173e 50%, #db8c0a 100%) !important;
+    color: #ffffff !important;
   }
-  
-  .torn-paper-top {
-    clip-path: polygon(
-      0% 15%, 5% 5%, 10% 15%, 
-      15% 5%, 20% 15%, 
-      25% 5%, 30% 15%, 
-      35% 5%, 40% 15%, 
-      45% 5%, 50% 15%, 
-      55% 5%, 60% 15%, 
-      65% 5%, 70% 15%, 
-      75% 5%, 80% 15%, 
-      85% 5%, 90% 15%, 
-      95% 5%, 100% 15%, 
-      100% 100%, 0% 100%
-    );
-  }
+}
+@utility text-gradient-crimson-spark {
+  background: linear-gradient(135deg, #B91C1C 0%, #E11D48 50%, #F59E0B 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+@utility border-crimson-spark {
+  border-image: linear-gradient(135deg, #B91C1C 0%, #E11D48 50%, #F59E0B 100%) 1 !important;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes bg-zoom {
+  0%, 100% { transform: scale(1.03); }
+  50% { transform: scale(1.10); }
+}
+.animate-bg-zoom {
+  animation: bg-zoom 25s ease-in-out infinite;
 }

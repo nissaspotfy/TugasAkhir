@@ -4,6 +4,11 @@ const { StatusCodes } = require('http-status-codes');
 const { geocodeAddress } = require('../shipping/shipping');
 
 const addAddress = async (userId, data) => {
+    const count = await Address.count({ where: { user_id: userId } });
+    if (count >= 3) {
+        throw new BadRequestError('Maksimal 3 alamat yang dapat disimpan.');
+    }
+
     // Geocode if missing coords
     if (!data.latitude || !data.longitude) {
         const addressString = `${data.address_line}, ${data.city}, ${data.postal_code}`;

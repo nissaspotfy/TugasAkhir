@@ -48,6 +48,8 @@ const calculateShippingCost = async (addressId, items = []) => {
             address.latitude,
             address.longitude
         );
+    } else {
+        distance = 3.0; // Fallback distance if no lat/long
     }
 
     // Calculate Total Weight
@@ -60,63 +62,41 @@ const calculateShippingCost = async (addressId, items = []) => {
             }
         }
     } else {
-        totalWeight = 1000; // Default 1kg if no items provided
+        totalWeight = 1000;
     }
 
-    const weightInKg = Math.ceil(totalWeight / 1000);
     const options = [];
 
-    // 1. Gojek
-    if (distance > 0 && distance <= GOJEK_MAX_KM) {
-        // Instant
-        const instantCost = Math.ceil(distance * GOJEK_RATE_PER_KM);
-        options.push({
-            provider: 'Gojek',
-            service: 'Instant',
-            cost: Math.max(instantCost, 15000), // Min 15k
-            estimated: '1-3 Hours'
-        });
+    // 1. Flash (Tercepat)
+    // Tarif dasar Rp 12.000 + Rp 2.500/km (dibulatkan ke kelipatan Rp 100)
+    const flashBase = 12000;
+    const flashDistanceCost = distance * 2500;
+    const flashTotalCost = Math.round((flashBase + flashDistanceCost) / 100) * 100;
+    // Estimasi waktu: 15-20 menit + (1.5 menit per km)
+    const flashMinTime = 15 + Math.round(distance * 1.5);
+    const flashMaxTime = 20 + Math.round(distance * 1.5);
 
-        // Same Day (Only if <= 20km)
-        if (distance <= GOJEK_SAMEDAY_MAX_KM) {
-            const sameDayCost = Math.ceil(distance * GOJEK_SAMEDAY_RATE_PER_KM);
-            options.push({
-                provider: 'Gojek',
-                service: 'Same Day',
-                cost: Math.max(sameDayCost, 10000), // Min 10k
-                estimated: '6-8 Hours'
-            });
-        }
-    }
-
-    // 2. JNE
-    // Simulate cost: Base cost * weight. 
-    // Add small distance factor for realism (mock).
-    const jneBase = 9000;
-    const distanceFactor = Math.ceil(distance / 100) * 2000; // +2k per 100km
-    const jneCost = (jneBase + distanceFactor) * weightInKg;
-    
     options.push({
-        provider: 'JNE',
-        service: 'REG',
-        cost: jneCost,
-        estimated: '2-3 Days'
-    });
-    options.push({
-        provider: 'JNE',
-        service: 'YES',
-        cost: jneCost + 5000 * weightInKg,
-        estimated: '1 Day'
+        provider: 'Flash',
+        service: 'Tercepat',
+        cost: Math.max(12000, flashTotalCost),
+        estimated: `${flashMinTime}-${flashMaxTime} Menit`
     });
 
-    // 3. J&T
-    const jntBase = 10000;
-    const jntCost = (jntBase + distanceFactor) * weightInKg;
+    // 2. Reguler (Standar)
+    // Tarif dasar Rp 7.000 + Rp 1.500/km (dibulatkan ke kelipatan Rp 100)
+    const regulerBase = 7000;
+    const regulerDistanceCost = distance * 1500;
+    const regulerTotalCost = Math.round((regulerBase + regulerDistanceCost) / 100) * 100;
+    // Estimasi waktu: 20-30 menit + (2.5 menit per km)
+    const regulerMinTime = 20 + Math.round(distance * 2.5);
+    const regulerMaxTime = 30 + Math.round(distance * 2.5);
+
     options.push({
-        provider: 'J&T',
-        service: 'EZ',
-        cost: jntCost,
-        estimated: '2-3 Days'
+        provider: 'Reguler',
+        service: 'Standar',
+        cost: Math.max(7000, regulerTotalCost),
+        estimated: `${regulerMinTime}-${regulerMaxTime} Menit`
     });
 
     return {

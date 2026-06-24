@@ -4,6 +4,7 @@ const fs = require('fs');
 
 const directories = {
     profilePicture: path.join(__dirname, '../../public/uploads/profilePicture'),
+    productImage: path.join(__dirname, '../../public/uploads/products'),
 }
 
 Object.values(directories).forEach((dir) => {
@@ -44,7 +45,9 @@ const uploadConfig = (directory, type, maxSize) => {
 }
 
 const uploadProfilePicture = uploadConfig(directories.profilePicture, 'images', 5 * 1024 * 1024); // 5 MB
+const uploadProductImage = uploadConfig(directories.productImage, 'images', 5 * 1024 * 1024); // 5 MB
 
 module.exports = {
     uploadProfilePicture,
+    uploadProductImage,
 };

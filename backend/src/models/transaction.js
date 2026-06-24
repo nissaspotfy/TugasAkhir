@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'shipping_address_id',
         as: 'shippingAddress'
       });
+      Transaction.hasOne(models.review, {
+        foreignKey: 'transaction_id',
+        as: 'review'
+      });
     }
   }
   Transaction.init({
@@ -53,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     status: {
-      type: DataTypes.ENUM('pending', 'completed', 'cancelled'),
+      type: DataTypes.ENUM('pending', 'paid', 'processing', 'success', 'failed', 'cancelled'),
       defaultValue: 'pending'
     }
   }, {

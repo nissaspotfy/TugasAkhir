@@ -16,7 +16,7 @@ const registerUser = async (body) => {
 
     const userExist = await user.findOne({ where: { email } });
     if (userExist) {
-        throw new ConflictError('User already exists');
+        throw new ConflictError('Email sudah terdaftar');
     }
 
     //set role_id to 'User' role
@@ -55,7 +55,7 @@ const registerAdmin = async (body) => {
 
     const userExist = await user.findOne({ where: { email } });
     if (userExist) {
-        throw new ConflictError('User already exists');
+        throw new ConflictError('Email sudah terdaftar');
     }
     //set role_id to 'Admin' role
     const adminRole = await role.findOne({ where: { nama_role: 'Admin' } });

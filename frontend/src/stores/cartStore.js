@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
+import { devtools, persist, createJSONStorage } from 'zustand/middleware'
 import api from '../lib/api'
 import useAuthStore from './authStore'
 
@@ -110,9 +110,14 @@ const useCartStore = create(
 
         clearCart: async () => {
             set({ items: [] });
-            // We usually don't need to clear backend cart explicitly on logout as it persists, 
-            // but on checkout success we might. 
-            // If this is called on logout, we just clear local state (which we did in Navbar).
+            const isAuthenticated = useAuthStore.getState().isAuthenticated;
+            if (isAuthenticated) {
+                try {
+                    await api.delete('/cart');
+                } catch (error) {
+                    console.error("Failed to clear backend cart", error);
+                }
+            }
         },
 
         getTotalPrice: () => {
@@ -125,6 +130,7 @@ const useCartStore = create(
       }),
       {
         name: 'cart-storage',
+        storage: createJSONStorage(() => sessionStorage),
       }
     )
   )

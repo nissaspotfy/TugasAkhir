@@ -20,13 +20,49 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        name: 'Sate Ayam Madura',
-        description: 'Sate ayam dengan bumbu kacang khas Madura yang kental.',
-        price: 30000,
-        stock: 40,
+        name: 'Seblak',
+        description: 'Seblak kuah pedas dengan berbagai aneka topping kerupuk, sosis, dan makaroni.',
+        price: 15000,
+        stock: 50,
         weight: 300,
         category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c1',
-        image_url: 'https://images.unsplash.com/photo-1539255627054-94e339678829?auto=format&fit=crop&q=80&w=500',
+        image_url: 'https://images.unsplash.com/photo-1596662951482-0c4ba74a6df6?auto=format&fit=crop&q=80&w=500',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: uuidv4(),
+        name: 'Mie Telor',
+        description: 'Mie goreng telor khas nusantara yang gurih dan lezat.',
+        price: 18000,
+        stock: 60,
+        weight: 300,
+        category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c1',
+        image_url: 'https://images.unsplash.com/photo-1612929633738-8fe01f7c8ec2?auto=format&fit=crop&q=80&w=500',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: uuidv4(),
+        name: 'Nasi Kepal',
+        description: 'Nasi kepal berisi suwiran ayam pedas, praktis dan mengenyangkan.',
+        price: 10000,
+        stock: 40,
+        weight: 200,
+        category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c1',
+        image_url: 'https://images.unsplash.com/photo-1580828369019-2238b69db7bc?auto=format&fit=crop&q=80&w=500',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: uuidv4(),
+        name: 'Pisang Keju',
+        description: 'Pisang bakar bertabur keju melimpah dan susu kental manis.',
+        price: 12000,
+        stock: 30,
+        weight: 250,
+        category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c1',
+        image_url: 'https://images.unsplash.com/photo-1628108422176-000c2ab46261?auto=format&fit=crop&q=80&w=500',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -64,7 +100,7 @@ module.exports = {
         stock: 45,
         weight: 300,
         category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c3',
-        image_url: 'https://images.unsplash.com/photo-1583224964978-2257b960703c?auto=format&fit=crop&q=80&w=500',
+        image_url: 'https://images.unsplash.com/photo-1583224964685-2c8b05697bb3?auto=format&fit=crop&q=80&w=500',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -80,19 +116,43 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
-      // India (ID 3f816432-f7b4-4e3a-9c7a-8727276568c4)
       {
         id: uuidv4(),
-        name: 'Nasi Biryani Ayam',
-        description: 'Nasi basmati berbumbu rempah kuat dengan potongan ayam.',
-        price: 50000,
-        stock: 20,
+        name: 'Tomyum',
+        description: 'Sup asam pedas segar dengan perpaduan rempah dan hidangan laut mini.',
+        price: 38000,
+        stock: 30,
         weight: 400,
-        category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c4',
-        image_url: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&q=80&w=500',
+        category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c3',
+        image_url: 'https://images.unsplash.com/photo-1548943487-a2e4f43b4850?auto=format&fit=crop&q=80&w=500',
         createdAt: new Date(),
         updatedAt: new Date()
       },
+      {
+        id: uuidv4(),
+        name: 'Rabboki',
+        description: 'Perpaduan ramen kenyal dan tteokbokki berbalut saus gochujang autentik.',
+        price: 32000,
+        stock: 40,
+        weight: 350,
+        category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c3',
+        image_url: 'https://images.unsplash.com/photo-1583224964978-2257b960703c?auto=format&fit=crop&q=80&w=500',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: uuidv4(),
+        name: 'Kimbab',
+        description: 'Gulungan nasi ala Korea dengan isian sayuran, telur, dan daging yang lezat.',
+        price: 25000,
+        stock: 35,
+        weight: 250,
+        category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c3',
+        image_url: 'https://images.unsplash.com/photo-1647414844621-66defdc566d2?auto=format&fit=crop&q=80&w=500',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      // India (ID 3f816432-f7b4-4e3a-9c7a-8727276568c4)
       {
         id: uuidv4(),
         name: 'Roti Canai Kari',
@@ -102,6 +162,18 @@ module.exports = {
         weight: 200,
         category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c4',
         image_url: 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&q=80&w=500',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: uuidv4(),
+        name: 'Roti Maryam',
+        description: 'Roti maryam hangat yang bertekstur lembut dan berserat.',
+        price: 15000,
+        stock: 60,
+        weight: 150,
+        category_id: '3f816432-f7b4-4e3a-9c7a-8727276568c4',
+        image_url: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=500',
         createdAt: new Date(),
         updatedAt: new Date()
       }

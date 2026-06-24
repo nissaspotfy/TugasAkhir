@@ -30,9 +30,17 @@ const getProfile = async (userId) => {
     if (!userExist) {
         throw new NotFoundError('User not found');
     }
-    const profileExist = await profile.findOne({ where: { user_id: userId } });
+    let profileExist = await profile.findOne({ where: { user_id: userId } });
     if (!profileExist) {
-        throw new NotFoundError('Profile not found');
+        const baseUsername = userExist.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user';
+        const uniqueUsername = `${baseUsername}${Math.floor(1000 + Math.random() * 9000)}`;
+        profileExist = await profile.create({
+            user_id: userId,
+            username: uniqueUsername,
+            bio: '',
+            profilePicture: null,
+            dateOfBirth: null
+        });
     }
     const profileData = {
         id: profileExist.id,
@@ -40,6 +48,10 @@ const getProfile = async (userId) => {
         bio: profileExist.bio,
         dateOfBirth: profileExist.dateOfBirth,
         profilePicture: profileExist.profilePicture ? `${process.env.BASE_URL}${profileExist.profilePicture}` : null,
+        full_name: userExist.name,
+        email: userExist.email,
+        notification_promo: !!profileExist.notification_promo,
+        notification_status: !!profileExist.notification_status
     };
     return profileData;
 }
@@ -90,20 +102,46 @@ const createProfile = async (body, files, userId) => {
 
 const updateProfile = async (body, files, userId) => {
     try {
-        const { error } = profileSchema.validate(body);
+        const { error } = updateProfileSchema.validate(body);
         if (error) {
             throw new BaseError(StatusCodes.BAD_REQUEST, error.details[0].message);
         }
 
-        const { username, bio, dateOfBirth } = body;
+        const { username, bio, dateOfBirth, full_name, email, notification_promo, notification_status } = body;
         const userExist = await user.findByPk(userId);
         if (!userExist) {
             throw new NotFoundError('User not found');
         }
-        const profileExist = await profile.findOne({ where: { user_id: userId } });
+        
+        let profileExist = await profile.findOne({ where: { user_id: userId } });
         if (!profileExist) {
-            throw new NotFoundError('Profile not found');
+            const baseUsername = userExist.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user';
+            const uniqueUsername = `${baseUsername}${Math.floor(1000 + Math.random() * 9000)}`;
+            profileExist = await profile.create({
+                user_id: userId,
+                username: uniqueUsername,
+                bio: '',
+                profilePicture: null,
+                dateOfBirth: null
+            });
         }
+
+        // Update user fields
+        const userUpdateData = {};
+        if (full_name !== undefined) userUpdateData.name = full_name;
+        if (email !== undefined) {
+            if (email !== userExist.email) {
+                const emailExist = await user.findOne({ where: { email } });
+                if (emailExist) {
+                    throw new BaseError(StatusCodes.CONFLICT, 'Email sudah terdaftar');
+                }
+            }
+            userUpdateData.email = email;
+        }
+        if (Object.keys(userUpdateData).length > 0) {
+            await user.update(userUpdateData, { where: { id: userId } });
+        }
+
         // Check if the profile picture is provided in the request
         let profilePicture = profileExist.profilePicture;
         if (files && files['profile_picture']) {
@@ -111,31 +149,59 @@ const updateProfile = async (body, files, userId) => {
             if (profileExist.profilePicture) {
                 const oldProfilePicturePath = path.join(process.cwd(), 'public' ,profileExist.profilePicture);
                 console.log('Deleting old profile picture:', oldProfilePicturePath);
-                fs.existsSync(oldProfilePicturePath) && fs.unlinkSync(oldProfilePicturePath);
+                try {
+                    fs.existsSync(oldProfilePicturePath) && fs.unlinkSync(oldProfilePicturePath);
+                } catch (err) {
+                    console.error('Error deleting old profile picture file:', err);
+                }
             }
             profilePicture = files['profile_picture'][0].path.replace(/\\/g, '/');
             const profilePictureFile = profilePicture.split('/public')[1];
             profilePicture = profilePictureFile;
         }
-        await profile.update({
-            username,
-            bio,
+
+        const profileUpdateFields = {
             profilePicture,
-            dateOfBirth,
-        }, { where: { user_id: userId } });
+        };
+        if (username !== undefined) profileUpdateFields.username = username;
+        if (bio !== undefined) profileUpdateFields.bio = bio;
+        if (dateOfBirth !== undefined) profileUpdateFields.dateOfBirth = dateOfBirth;
+        if (notification_promo !== undefined) {
+            profileUpdateFields.notification_promo = notification_promo === 'true' || notification_promo === true;
+        }
+        if (notification_status !== undefined) {
+            profileUpdateFields.notification_status = notification_status === 'true' || notification_status === true;
+        }
+
+        await profile.update(profileUpdateFields, { where: { user_id: userId } });
+
+        const updatedUser = await user.findByPk(userId);
         const updatedProfile = await profile.findOne({ where: { user_id: userId } });
-        return updatedProfile;
+
+        return {
+            id: updatedProfile.id,
+            username: updatedProfile.username,
+            bio: updatedProfile.bio,
+            dateOfBirth: updatedProfile.dateOfBirth,
+            profilePicture: updatedProfile.profilePicture ? `${process.env.BASE_URL}${updatedProfile.profilePicture}` : null,
+            full_name: updatedUser.name,
+            email: updatedUser.email,
+            notification_promo: !!updatedProfile.notification_promo,
+            notification_status: !!updatedProfile.notification_status
+        };
     } catch (error) {
         // Handle uploaded file when an error occurs
         if (files && files['profile_picture']) {
             const profilePicturePath = files['profile_picture'][0].path;
-            fs.unlink(profilePicturePath, (err) => {
-                if (err) {
-                    console.error('Error deleting uploaded profile picture:', err);
-                }
-            });
+            try {
+                fs.unlinkSync(profilePicturePath);
+            } catch (err) {
+                console.error('Error deleting uploaded profile picture:', err);
+            }
         }
-
+        if (error instanceof BaseError) {
+            throw error;
+        }
         throw new BaseError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error updating profile : ' + error.message);
     }
 }

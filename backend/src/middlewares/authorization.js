@@ -18,7 +18,7 @@ const authMiddleware = async (req, res, next) => {
             throw new BaseError(StatusCodes.UNAUTHORIZED, 'Token not provided');
         }
 
-        const decoded = verifyToken(token, JWT_SECRET);
+        const decoded = verifyToken(token, JWT_SECRET, true);
         if (decoded instanceof Error) {
             throw new BaseError(StatusCodes.UNAUTHORIZED, 'Invalid token');
         }
@@ -36,6 +36,33 @@ const authMiddleware = async (req, res, next) => {
     }
 }
 
+const adminMiddleware = async (req, res, next) => {
+    try {
+        if (!req.user) {
+            throw new BaseError(StatusCodes.UNAUTHORIZED, 'Authentication required');
+        }
+
+        let roleName = '';
+        if (req.user.role) {
+            roleName = req.user.role.nama_role;
+        } else {
+            const userWithRole = await user.findByPk(req.user.id, {
+                include: [{ model: require('../models').role, as: 'role' }]
+            });
+            roleName = userWithRole?.role?.nama_role || '';
+        }
+
+        if (roleName !== 'Admin') {
+            throw new BaseError(StatusCodes.FORBIDDEN, 'Admin access required');
+        }
+
+        next();
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     authMiddleware,
+    adminMiddleware,
 };

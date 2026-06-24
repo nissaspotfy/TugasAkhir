@@ -1,6 +1,6 @@
 const { BaseError,ConflictError, NotFoundError } = require('../../common/responses/error-response');
 const { StatusCodes } = require('http-status-codes');
-const { user } = require('../../models');
+const { user, role, profile } = require('../../models');
 const { loginSchema } = require('../../common/validation/auth/auth');
 const {comparePassword} = require('../../common/utils/user');
 const { JWT_SECRET } = process.env;
@@ -16,20 +16,39 @@ const login = async (body) => {
 
     const { email, password } = body;
 
-    const userExist = await user.findOne({ where: { email } });
+    const userExist = await user.findOne({ 
+        where: { email },
+        include: [
+            {
+                model: role,
+                as: 'role'
+            },
+            {
+                model: profile,
+                as: 'profiles'
+            }
+        ]
+    });
     if (!userExist) {
-        throw new NotFoundError('User not found');
+        throw new NotFoundError('Akun tidak ditemukan');
     }
 
     const isPasswordValid = await comparePassword(password, userExist.password);
     if (!isPasswordValid) {
-        throw new BaseError(StatusCodes.UNAUTHORIZED, 'Invalid password');
+        throw new BaseError(StatusCodes.UNAUTHORIZED, 'Kata sandi salah');
     }
     const token = generateToken({ id: userExist.id, email: userExist.email });
+    const primaryProfile = userExist.profiles?.[0];
+    const profilePicture = primaryProfile?.profilePicture 
+        ? `${process.env.BASE_URL}${primaryProfile.profilePicture}` 
+        : null;
+
     const userData = {
         id: userExist.id,
         name: userExist.name,
         email: userExist.email,
+        role: userExist.role ? userExist.role.nama_role : null,
+        profilePicture,
         token,
     };
         

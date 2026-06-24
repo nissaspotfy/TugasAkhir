@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useAuthStore from '../../stores/authStore';
+import useAuthStore, { getUserRole } from '../../stores/authStore';
 import useCartStore from '../../stores/cartStore';
 import { loginSchema, registerSchema } from '../../schemas/authSchema';
 import { z } from 'zod';
@@ -35,7 +35,18 @@ const AuthPage = () => {
 
   // --- Login Logic ---
   const { login, register: registerUser, isLoading, error: authError } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const fetchCart = useCartStore((state) => state.fetchCart);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (getUserRole(user) === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
   
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [loginErrors, setLoginErrors] = useState({});
@@ -76,7 +87,13 @@ const AuthPage = () => {
       } catch (err) {
         console.error("Cart fetch failed but login succeeded", err);
       }
-      navigate('/dashboard');
+      
+      const currentUser = useAuthStore.getState().user;
+      if (getUserRole(currentUser) === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       console.error(error);
     }
@@ -119,17 +136,17 @@ const AuthPage = () => {
         confirm_password: registerData.confirmPassword
       });
       // After successful register, switch to login view automatically
-      addToast('Registration successful! Please sign in.', 'success');
+      addToast('Pendaftaran berhasil! Silakan masuk.', 'success');
       setLoginData(prev => ({ ...prev, email: registerData.email }));
       navigate('/login');
     } catch (error) {
       if (error.response?.status === 409) {
-        addToast('Email already registered. Please sign in.', 'info');
+        addToast('Email sudah terdaftar. Silakan masuk.', 'info');
         setLoginData(prev => ({ ...prev, email: registerData.email }));
         navigate('/login');
       } else {
         console.error(error);
-        addToast(authError || 'Registration failed', 'error');
+        addToast(authError || 'Pendaftaran gagal. Silakan coba lagi.', 'error');
       }
     }
   };
@@ -144,13 +161,13 @@ const AuthPage = () => {
                onClick={() => handleModeSwitch('signin')}
                className={`text-sm font-bold px-4 py-2 rounded-full transition-colors ${!isSignUp ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
              >
-               Sign In
+               Masuk
              </button>
              <button 
                onClick={() => handleModeSwitch('signup')}
                className={`text-sm font-bold px-4 py-2 rounded-full transition-colors ${isSignUp ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
              >
-               Sign Up
+               Daftar
              </button>
           </div>
 
@@ -161,12 +178,12 @@ const AuthPage = () => {
               ${!isSignUp ? 'hidden' : ''} md:flex
           `}>
              <form onSubmit={handleRegisterSubmit} className="bg-white flex flex-col items-center justify-center h-full px-8 text-center space-y-4 w-full">
-                <h1 className="text-3xl font-heading font-bold text-primary">Create Account</h1>
-                <p className="text-sm text-muted-foreground mb-4">Use your email for registration</p>
+                <h1 className="text-3xl font-heading font-bold text-primary">Buat Akun</h1>
+                <p className="text-sm text-muted-foreground mb-4">Gunakan email Anda untuk pendaftaran</p>
                 
                 <fieldset disabled={!isSignUp} className="w-full space-y-3 max-w-xs text-left">
                     <div>
-                        <Input name="username" placeholder="Name" value={registerData.username} onChange={handleRegisterChange} className="bg-gray-100 border-none" />
+                        <Input name="username" placeholder="Nama" value={registerData.username} onChange={handleRegisterChange} className="bg-gray-100 border-none" />
                         {registerErrors.username && <span className="text-xs text-red-500 ml-1">{registerErrors.username}</span>}
                     </div>
                     <div>
@@ -174,11 +191,11 @@ const AuthPage = () => {
                         {registerErrors.email && <span className="text-xs text-red-500 ml-1">{registerErrors.email}</span>}
                     </div>
                     <div>
-                        <Input name="password" type="password" placeholder="Password" value={registerData.password} onChange={handleRegisterChange} className="bg-gray-100 border-none" />
+                        <Input name="password" type="password" placeholder="Kata Sandi" value={registerData.password} onChange={handleRegisterChange} className="bg-gray-100 border-none" />
                         {registerErrors.password && <span className="text-xs text-red-500 ml-1">{registerErrors.password}</span>}
                     </div>
                      <div>
-                        <Input name="confirmPassword" type="password" placeholder="Confirm Password" value={registerData.confirmPassword} onChange={handleRegisterChange} className="bg-gray-100 border-none" />
+                        <Input name="confirmPassword" type="password" placeholder="Konfirmasi Kata Sandi" value={registerData.confirmPassword} onChange={handleRegisterChange} className="bg-gray-100 border-none" />
                         {registerErrors.confirmPassword && <span className="text-xs text-red-500 ml-1">{registerErrors.confirmPassword}</span>}
                     </div>
                 </fieldset>
@@ -186,7 +203,7 @@ const AuthPage = () => {
                 {authError && <div className="text-xs text-red-500">{authError}</div>}
 
                 <Button type="submit" className="rounded-full px-12 font-bold uppercase tracking-wider mt-4" disabled={isLoading || !isSignUp}>
-                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign Up'}
+                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Daftar'}
                 </Button>
              </form>
           </div>
@@ -201,13 +218,13 @@ const AuthPage = () => {
                 <div className="absolute top-6 left-6">
                     <Link to="/">
                         <Button variant="ghost" size="sm" className="pl-0 hover:bg-transparent text-muted-foreground">
-                        <ArrowLeft className="mr-2 h-4 w-4" /> Home
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Beranda
                         </Button>
                     </Link>
                 </div>
 
-                <h1 className="text-3xl font-heading font-bold text-primary">Sign in</h1>
-                <p className="text-sm text-muted-foreground mb-4">Use your account</p>
+                <h1 className="text-3xl font-heading font-bold text-primary">Masuk</h1>
+                <p className="text-sm text-muted-foreground mb-4">Gunakan akun Anda</p>
                 
                 <fieldset disabled={isSignUp} className="w-full space-y-3 max-w-xs text-left">
                     <div>
@@ -215,19 +232,19 @@ const AuthPage = () => {
                         {loginErrors.email && <span className="text-xs text-red-500 ml-1">{loginErrors.email}</span>}
                     </div>
                     <div>
-                        <Input name="password" type="password" placeholder="Password" value={loginData.password} onChange={handleLoginChange} onKeyDown={(e) => { if (e.key === 'Enter') handleLoginSubmit(e); }} className="bg-gray-100 border-none" />
+                        <Input name="password" type="password" placeholder="Kata Sandi" value={loginData.password} onChange={handleLoginChange} onKeyDown={(e) => { if (e.key === 'Enter') handleLoginSubmit(e); }} className="bg-gray-100 border-none" />
                         {loginErrors.password && <span className="text-xs text-red-500 ml-1">{loginErrors.password}</span>}
                     </div>
                 </fieldset>
 
                 <div className="text-xs text-muted-foreground">
-                    <Link to="#" className="hover:text-primary transition-colors">Forgot your password?</Link>
+                    <Link to="/forgot-password" className="hover:text-primary transition-colors">Lupa kata sandi?</Link>
                 </div>
 
                 {authError && <div className="text-xs text-red-500">{authError}</div>}
 
                 <Button type="submit" className="rounded-full px-12 font-bold uppercase tracking-wider mt-4" disabled={isLoading || isSignUp}>
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign In'}
+                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Masuk'}
                 </Button>
              </form>
           </div>
@@ -256,14 +273,14 @@ const AuthPage = () => {
                         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop')" }}
                       />
                       <div className="relative z-10 max-w-xs">
-                        <h1 className="text-4xl font-heading font-bold mb-4">Welcome Back!</h1>
-                        <p className="text-lg font-medium mb-8">To keep connected with us please login with your personal info</p>
+                        <h1 className="text-4xl font-heading font-bold mb-4">Selamat Datang Kembali!</h1>
+                        <p className="text-lg font-medium mb-8">Untuk tetap terhubung dengan kami, silakan masuk dengan informasi pribadi Anda</p>
                         <Button 
                             variant="outline" 
                             className="bg-transparent border-white text-white hover:bg-white hover:text-primary rounded-full px-12 py-6 font-bold uppercase tracking-wider text-base"
                             onClick={() => handleModeSwitch('signin')}
                         >
-                            Sign In
+                            Masuk
                         </Button>
                       </div>
                   </div>
@@ -277,14 +294,14 @@ const AuthPage = () => {
                         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2070&auto=format&fit=crop')" }}
                       />
                       <div className="relative z-10 max-w-xs">
-                        <h1 className="text-4xl font-heading font-bold mb-4">Hello, Friend!</h1>
-                        <p className="text-lg font-medium mb-8">Enter your personal details and start journey with us</p>
+                        <h1 className="text-4xl font-heading font-bold mb-4">Halo, Teman!</h1>
+                        <p className="text-lg font-medium mb-8">Masukkan data diri Anda dan mulai perjalanan bersama kami</p>
                         <Button 
                             variant="outline" 
                             className="bg-transparent border-white text-white hover:bg-white hover:text-primary rounded-full px-12 py-6 font-bold uppercase tracking-wider text-base"
                             onClick={() => handleModeSwitch('signup')}
                         >
-                            Sign Up
+                            Daftar
                         </Button>
                       </div>
                   </div>
