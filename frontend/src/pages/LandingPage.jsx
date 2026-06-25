@@ -276,25 +276,25 @@ export default function LandingPage() {
       </section>
 
       {/* App Promo Banner */}
-      <section className="py-12 bg-background">
+      <section className="py-12 bg-slate-50/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#5c0e14] rounded-3xl overflow-hidden shadow-xl text-white relative">
+          <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-slate-800 relative">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center px-8 py-12 sm:px-12">
               {/* Left Text */}
-              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-xs font-bold tracking-wider">
+              <div className="lg:col-span-7 space-y-6 text-center lg:text-left z-10">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-200/50 rounded-full text-xs font-semibold text-slate-600 tracking-wider">
                   <Smartphone size={14} /> Mobile App Experience
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-heading font-black leading-tight text-white">
+                <h2 className="text-3xl sm:text-4xl font-heading font-black leading-tight text-slate-900">
                   Akses D'raosan Lebih Cepat dari Layar HP Anda
                 </h2>
-                <p className="text-sm text-red-100 max-w-lg leading-relaxed">
+                <p className="text-sm text-slate-500 max-w-lg leading-relaxed">
                   Tambahkan aplikasi web D'raosan ke layar utama smartphone Anda dan nikmati pemesanan instan tanpa perlu mengunduh apa pun dari App Store.
                 </p>
                 <div className="pt-2">
                   <Button
                     onClick={handleInstallApp}
-                    className="bg-white hover:bg-slate-100 text-[#5c0e14] rounded-full px-8 py-3.5 h-auto text-sm font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-300"
+                    className="bg-[#bf3843] hover:bg-[#a32f38] text-white rounded-full px-8 py-3.5 h-auto text-sm font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-300"
                   >
                     Tambahkan ke Layar Utama
                   </Button>
@@ -302,12 +302,12 @@ export default function LandingPage() {
               </div>
 
               {/* Right Phone Mockup */}
-              <div className="lg:col-span-5 flex justify-center items-end self-end lg:-mb-12">
+              <div className="lg:col-span-5 flex justify-center items-end self-end lg:-mb-12 z-10">
                 <div className="w-64 h-64 sm:w-80 sm:h-80 relative">
                   <img
                     src="/iphone_mockup.png"
                     alt="iPhone app mockup"
-                    className="w-full h-full object-contain drop-shadow-2xl"
+                    className="w-full h-full object-contain drop-shadow-xl"
                   />
                 </div>
               </div>

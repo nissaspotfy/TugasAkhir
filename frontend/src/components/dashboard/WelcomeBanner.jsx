@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Button } from '../ui/button'
-import { Link } from 'react-router-dom'
-import { Sparkles, Tag } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import api from '../../lib/api'
 
 export function WelcomeBanner({ userName }) {
@@ -69,14 +67,6 @@ export function WelcomeBanner({ userName }) {
                     <p className="text-[11px] text-yellow-200 flex items-center gap-1">
                         <span>🏷️</span> <span>Klik tombol melayang di pojok kanan bawah untuk menyalin voucher lainnya!</span>
                     </p>
-                </div>
-
-                <div className="flex-shrink-0">
-                    <Link to="/menu">
-                        <Button className="bg-white hover:bg-gray-100 text-primary hover:text-[#941c26] rounded-full px-6 py-3.5 h-auto text-sm font-bold shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95">
-                            Lihat Menu
-                        </Button>
-                    </Link>
                 </div>
             </div>
             {/* Elegant Decor */}
