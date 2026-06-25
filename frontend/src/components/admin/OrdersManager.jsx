@@ -517,7 +517,7 @@ export function OrdersManager() {
             )}
 
             {/* Rekayasa Modal yang Lebih Elegan & Minimalis */}
-            <Modal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} title={<span className="flex items-center gap-2"><Receipt size={20}/> Tiket Tagihan</span>}>
+            <Modal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} title={<span className="flex items-center gap-2"><Receipt size={20}/> Tiket Tagihan</span>} size="xl">
                 {selectedOrder && (
                     <div className="space-y-6">
                         {/* Header Nota */}
@@ -539,10 +539,10 @@ export function OrdersManager() {
                                 <div className="mt-0.5 text-muted-foreground"><ShoppingBag size={18}/></div>
                                 <div>
                                     <p className="text-xs font-bold text-muted-foreground">Oleh</p>
-                                    <p className="text-sm font-bold text-slate-800 truncate max-w-[100px]" title={selectedOrder.user?.username || "Pengunjung"}>
+                                    <p className="text-sm font-bold text-slate-800 truncate max-w-[200px]" title={selectedOrder.user?.username || "Pengunjung"}>
                                         {selectedOrder.user?.username || "Pengunjung"}
                                     </p>
-                                    <p className="text-[10px] text-muted-foreground truncate max-w-[100px]" title={selectedOrder.user?.email || "-"}>
+                                    <p className="text-[10px] text-muted-foreground truncate max-w-[200px]" title={selectedOrder.user?.email || "-"}>
                                         {selectedOrder.user?.email || "-"}
                                     </p>
                                 </div>
@@ -559,10 +559,10 @@ export function OrdersManager() {
                                 <div className="mt-0.5 text-muted-foreground"><MapPin size={18}/></div>
                                 <div>
                                     <p className="text-xs font-bold text-muted-foreground">Layanan</p>
-                                    <p className="text-sm font-bold text-slate-800 truncate max-w-[100px]" title={selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Ambil Sendiri' : `Kirim (${selectedOrder.shipping_provider || 'Kurir'})`}>
+                                    <p className="text-sm font-bold text-slate-800 truncate max-w-[200px]" title={selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Ambil Sendiri' : `Kirim (${selectedOrder.shipping_provider || 'Kurir'})`}>
                                         {selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Ambil Sendiri' : `Kirim (${selectedOrder.shipping_provider || 'Kurir'})`}
                                     </p>
-                                    <p className="text-xs text-muted-foreground truncate max-w-[100px]" title={selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Dine-in/Takeaway' : (selectedOrder.shipping_service || '-')}>
+                                    <p className="text-xs text-muted-foreground truncate max-w-[200px]" title={selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Dine-in/Takeaway' : (selectedOrder.shipping_service || '-')}>
                                         {selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Dine-in/Takeaway' : (selectedOrder.shipping_service || '-')}
                                     </p>
                                 </div>
@@ -671,7 +671,7 @@ export function OrdersManager() {
             </Modal>
 
             {/* Modal Edit Status Pesanan */}
-            <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title={<span className="flex items-center gap-2"><Edit size={20}/> Edit Status Pesanan</span>}>
+            <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title={<span className="flex items-center gap-2"><Edit size={20}/> Edit Status Pesanan</span>} size="xl">
                 {selectedOrder && (
                     <div className="space-y-6">
                         {/* Header Nota */}
@@ -693,10 +693,10 @@ export function OrdersManager() {
                                 <div className="mt-0.5 text-muted-foreground"><ShoppingBag size={18}/></div>
                                 <div>
                                     <p className="text-xs font-bold text-muted-foreground">Oleh</p>
-                                    <p className="text-sm font-bold text-slate-800 truncate max-w-[100px]" title={selectedOrder.user?.username || "Pengunjung"}>
+                                    <p className="text-sm font-bold text-slate-800 truncate max-w-[200px]" title={selectedOrder.user?.username || "Pengunjung"}>
                                         {selectedOrder.user?.username || "Pengunjung"}
                                     </p>
-                                    <p className="text-[10px] text-muted-foreground truncate max-w-[100px]" title={selectedOrder.user?.email || "-"}>
+                                    <p className="text-[10px] text-muted-foreground truncate max-w-[200px]" title={selectedOrder.user?.email || "-"}>
                                         {selectedOrder.user?.email || "-"}
                                     </p>
                                 </div>
@@ -713,10 +713,10 @@ export function OrdersManager() {
                                 <div className="mt-0.5 text-muted-foreground"><MapPin size={18}/></div>
                                 <div>
                                     <p className="text-xs font-bold text-muted-foreground">Layanan</p>
-                                    <p className="text-sm font-bold text-slate-800 truncate max-w-[100px]" title={selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Ambil Sendiri' : `Kirim (${selectedOrder.shipping_provider || 'Kurir'})`}>
+                                    <p className="text-sm font-bold text-slate-800 truncate max-w-[200px]" title={selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Ambil Sendiri' : `Kirim (${selectedOrder.shipping_provider || 'Kurir'})`}>
                                         {selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Ambil Sendiri' : `Kirim (${selectedOrder.shipping_provider || 'Kurir'})`}
                                     </p>
-                                    <p className="text-xs text-muted-foreground truncate max-w-[100px]" title={selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Dine-in/Takeaway' : (selectedOrder.shipping_service || '-')}>
+                                    <p className="text-xs text-muted-foreground truncate max-w-[200px]" title={selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Dine-in/Takeaway' : (selectedOrder.shipping_service || '-')}>
                                         {selectedOrder.shipping_provider === 'Ambil Sendiri' ? 'Dine-in/Takeaway' : (selectedOrder.shipping_service || '-')}
                                     </p>
                                 </div>

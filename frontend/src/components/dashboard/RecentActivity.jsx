@@ -70,16 +70,7 @@ export function TableRow({ id, menu, total, status, date, onReview, hasReview, o
                   )
                )}
 
-               {/* Batalkan Pesanan */}
-               {status === 'paid' && (
-                  <button
-                     onClick={onCancel}
-                     className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer border-none"
-                     title="Batalkan Pesanan"
-                  >
-                     <X size={16} />
-                  </button>
-               )}
+
 
                {/* Pesan Lagi */}
                {(status === 'paid' || status === 'processing' || status === 'success') && (
@@ -284,15 +275,25 @@ function TransactionDetailModal({ isOpen, onClose, transaction, onCancel }) {
                <p className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-2">Pelacakan Status Real-time</p>
                <div className="flex items-center justify-between relative mt-4">
                   <div className="flex flex-col items-center flex-1 z-10">
-                     <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold mb-2">✓</div>
-                     <p className="text-[10px] font-bold text-center">Diterima</p>
-                  </div>
-                  <div className={`absolute top-4 left-[15%] right-[50%] h-1 ${t.status === 'paid' || t.status === 'processing' || t.status === 'success' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                  <div className="flex flex-col items-center flex-1 z-10">
-                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mb-2 ${(t.status === 'paid' || t.status === 'processing' || t.status === 'success') ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
+                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mb-2 ${
+                        t.status === 'paid' || t.status === 'processing' || t.status === 'success' 
+                           ? 'bg-green-500 text-white' 
+                           : 'bg-gray-300 text-gray-600'
+                     }`}>
                         {t.status === 'paid' || t.status === 'processing' || t.status === 'success' ? '✓' : '•'}
                      </div>
-                     <p className="text-[10px] font-bold text-center">Diproses / Lunas</p>
+                     <p className="text-[10px] font-bold text-center">Lunas</p>
+                  </div>
+                  <div className={`absolute top-4 left-[15%] right-[50%] h-1 ${t.status === 'processing' || t.status === 'success' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                  <div className="flex flex-col items-center flex-1 z-10">
+                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mb-2 ${
+                        t.status === 'processing' || t.status === 'success' 
+                           ? 'bg-green-500 text-white' 
+                           : 'bg-gray-300 text-gray-600'
+                     }`}>
+                        {t.status === 'processing' || t.status === 'success' ? '✓' : '•'}
+                     </div>
+                     <p className="text-[10px] font-bold text-center">Diterima/Diproses</p>
                   </div>
                   <div className={`absolute top-4 left-[50%] right-[15%] h-1 ${t.status === 'success' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                   <div className="flex flex-col items-center flex-1 z-10">
