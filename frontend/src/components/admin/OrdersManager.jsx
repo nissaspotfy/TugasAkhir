@@ -157,7 +157,10 @@ export function OrdersManager() {
     const handlePrintInvoice = (order) => {
         const itemsHtml = order.items.map(item => `
             <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #ddd;">${item.product?.name || "Produk"}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+                    ${item.product?.name || "Produk"}
+                    ${item.note ? `<br/><small style="color: #bf3843; font-weight: bold; font-style: italic;">Catatan: ${item.note}</small>` : ''}
+                </td>
                 <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">Rp ${item.product?.price?.toLocaleString() || 0}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">Rp ${((item.product?.price || 0) * item.quantity).toLocaleString()}</td>
@@ -258,7 +261,10 @@ export function OrdersManager() {
     const handlePrintReceipt = (order) => {
         const itemsHtml = order.items.map(item => `
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span>${item.product?.name || "Produk"} x ${item.quantity}</span>
+                <span>
+                    ${item.product?.name || "Produk"} x ${item.quantity}
+                    ${item.note ? `<br/><span style="font-size: 11px; font-weight: bold; font-style: italic;">*Catatan: ${item.note}</span>` : ''}
+                </span>
                 <span>Rp ${((item.product?.price || 0) * item.quantity).toLocaleString()}</span>
             </div>
         `).join("");
@@ -576,6 +582,11 @@ export function OrdersManager() {
                                             <div>
                                                 <p className="font-bold text-foreground">{item.product?.name || "Produk Tidak Dikenal"}</p>
                                                 <p className="text-xs text-muted-foreground">@ Rp {item.product?.price?.toLocaleString() || 0}</p>
+                                                {item.note && (
+                                                    <p className="text-[11px] text-amber-700 bg-amber-50/70 border border-amber-200/50 rounded-lg px-2 py-0.5 mt-1 inline-block font-medium">
+                                                        Catatan: {item.note}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         <p className="font-bold text-foreground">Rp {((item.product?.price || 0) * item.quantity).toLocaleString()}</p>
@@ -637,22 +648,24 @@ export function OrdersManager() {
                         </div>
 
                         {/* Aksi Pesanan & Cetak Dokumen */}
-                        <div className="flex flex-col gap-3 pt-4 border-t border-border/50">
-                            <div className="w-full flex gap-2">
-                                <button 
-                                    onClick={() => handlePrintInvoice(selectedOrder)}
-                                    className="flex-1 border border-border hover:bg-secondary/50 text-foreground rounded-xl py-2 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                >
-                                    <Receipt size={14} /> Cetak Invoice (A4)
-                                </button>
-                                <button 
-                                    onClick={() => handlePrintReceipt(selectedOrder)}
-                                    className="flex-1 border border-border hover:bg-secondary/50 text-foreground rounded-xl py-2 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                >
-                                    <Receipt size={14} /> Cetak Struk (80mm)
-                                </button>
+                        {(selectedOrder.status === "processing" || selectedOrder.status === "success") && (
+                            <div className="flex flex-col gap-3 pt-4 border-t border-border/50">
+                                <div className="w-full flex gap-2">
+                                    <button 
+                                        onClick={() => handlePrintInvoice(selectedOrder)}
+                                        className="flex-1 border border-border hover:bg-secondary/50 text-foreground rounded-xl py-2 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                    >
+                                        <Receipt size={14} /> Cetak Invoice (A4)
+                                    </button>
+                                    <button 
+                                        onClick={() => handlePrintReceipt(selectedOrder)}
+                                        className="flex-1 border border-border hover:bg-secondary/50 text-foreground rounded-xl py-2 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                    >
+                                        <Receipt size={14} /> Cetak Struk (80mm)
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 )}
             </Modal>
@@ -723,6 +736,11 @@ export function OrdersManager() {
                                             <div>
                                                 <p className="font-bold text-foreground">{item.product?.name || "Produk Tidak Dikenal"}</p>
                                                 <p className="text-xs text-muted-foreground">@ Rp {item.product?.price?.toLocaleString() || 0}</p>
+                                                {item.note && (
+                                                    <p className="text-[11px] text-amber-700 bg-amber-50/70 border border-amber-200/50 rounded-lg px-2 py-0.5 mt-1 inline-block font-medium">
+                                                        Catatan: {item.note}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         <p className="font-bold text-foreground">Rp {((item.product?.price || 0) * item.quantity).toLocaleString()}</p>
