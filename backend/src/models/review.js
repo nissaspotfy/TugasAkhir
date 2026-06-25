@@ -34,6 +34,11 @@ module.exports = (sequelize, DataTypes) => {
     comment: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    show_on_homepage: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
     }
   }, {
     sequelize,

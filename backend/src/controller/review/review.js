@@ -1,6 +1,6 @@
 const BaseResponse = require('../../common/responses/base-response');
 const { StatusCodes } = require('http-status-codes');
-const { createReview, getAllReviews } = require('../../services/review/review');
+const { createReview, getAllReviews, getHomepageReviews, toggleReviewHomepage } = require('../../services/review/review');
 
 const createReviewController = async (req, res, next) => {
     try {
@@ -45,7 +45,40 @@ const getAllReviewsController = async (req, res, next) => {
     }
 };
 
+const getHomepageReviewsController = async (req, res, next) => {
+    try {
+        const result = await getHomepageReviews();
+        return res.status(StatusCodes.OK).json(
+            new BaseResponse({
+                status: StatusCodes.OK,
+                message: 'Homepage reviews retrieved successfully',
+                data: result
+            })
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
+const toggleReviewHomepageController = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await toggleReviewHomepage(id);
+        return res.status(StatusCodes.OK).json(
+            new BaseResponse({
+                status: StatusCodes.OK,
+                message: 'Review homepage status toggled successfully',
+                data: result
+            })
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createReviewController,
-    getAllReviewsController
+    getAllReviewsController,
+    getHomepageReviewsController,
+    toggleReviewHomepageController
 };

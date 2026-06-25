@@ -26,6 +26,7 @@ import { getFallbackFoodImage, handleImageError } from '../lib/imageFallback';
 
 export default function LandingPage() {
   const [products, setProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
   const { addToast } = useToast();
@@ -50,7 +51,16 @@ export default function LandingPage() {
         setLoading(false);
       }
     };
+    const fetchReviews = async () => {
+      try {
+        const res = await api.get('/reviews/homepage');
+        setReviews(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch homepage reviews", error);
+      }
+    };
     fetchProducts();
+    fetchReviews();
   }, []);
 
   const handleAddToCart = async (product) => {
@@ -235,43 +245,31 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Card 1 */}
-            <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-4 flex flex-col justify-between">
-              <Quote className="text-rose-200 w-10 h-10 flex-shrink-0" />
-              <p className="text-sm text-slate-600 leading-relaxed italic flex-1">
-                "Aplikasi pemesanannya sangat mulus, tanpa antre, dan makanannya sampai dalam keadaan hangat! Rekomendasi banget nasi liwetnya."
-              </p>
-              <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">Budi S.</span>
-                <div className="flex text-yellow-400 gap-0.5"><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /></div>
-              </div>
+          {reviews.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] max-w-md mx-auto">
+              <Quote className="text-rose-100 w-10 h-10 mx-auto mb-4" />
+              <p className="text-sm text-slate-500 font-medium">Belum ada ulasan pelanggan yang ditampilkan di Beranda.</p>
             </div>
-
-            {/* Card 2 */}
-            <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-4 flex flex-col justify-between">
-              <Quote className="text-rose-200 w-10 h-10 flex-shrink-0" />
-              <p className="text-sm text-slate-600 leading-relaxed italic flex-1">
-                "Cita rasa makanannya benar-benar khas Sunda Sukabumi, bumbunya meresap sampai ke dalam. Kemasannya sangat rapi & bersih!"
-              </p>
-              <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">Anissa N.</span>
-                <div className="flex text-yellow-400 gap-0.5"><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /></div>
-              </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {reviews.map((rev) => (
+                <div key={rev.id} className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-4 flex flex-col justify-between hover:shadow-md transition-all duration-300">
+                  <Quote className="text-rose-200 w-10 h-10 flex-shrink-0" />
+                  <p className="text-sm text-slate-600 leading-relaxed italic flex-1">
+                    "{rev.comment || 'Tidak ada komentar tertulis.'}"
+                  </p>
+                  <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">{rev.customer?.name || 'Pelanggan'}</span>
+                    <div className="flex text-yellow-400 gap-0.5">
+                      {Array.from({ length: rev.rating }).map((_, i) => (
+                        <Star key={i} size={12} className="fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-
-            {/* Card 3 */}
-            <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-4 flex flex-col justify-between">
-              <Quote className="text-rose-200 w-10 h-10 flex-shrink-0" />
-              <p className="text-sm text-slate-600 leading-relaxed italic flex-1">
-                "Suka sekali dengan kepraktisan pembayarannya yang cepat memakai QRIS Midtrans. Gak perlu repot transfer manual."
-              </p>
-              <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">Hendra W.</span>
-                <div className="flex text-yellow-400 gap-0.5"><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /></div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 

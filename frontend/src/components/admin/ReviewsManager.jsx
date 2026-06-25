@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
 import { Star, MessageSquare, Calendar, ShoppingBag, RefreshCw } from 'lucide-react';
+import { useToast } from '../ui/ToastProvider';
 
 export function ReviewsManager() {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [togglingId, setTogglingId] = useState(null);
+    const { addToast } = useToast();
+
+    const handleToggleHomepage = async (id, currentStatus) => {
+        setTogglingId(id);
+        try {
+            await api.put(`/reviews/${id}/toggle-homepage`);
+            setReviews(prev => prev.map(r => r.id === id ? { ...r, show_on_homepage: !currentStatus } : r));
+            addToast(!currentStatus ? "Ulasan berhasil ditampilkan di Beranda" : "Ulasan berhasil disembunyikan dari Beranda", "success");
+        } catch (err) {
+            console.error("Failed to toggle homepage status", err);
+            addToast(err.response?.data?.message || "Gagal mengubah status tampilan ulasan.", "error");
+        } finally {
+            setTogglingId(null);
+        }
+    };
 
     const fetchReviews = async () => {
         setLoading(true);
@@ -74,7 +91,7 @@ export function ReviewsManager() {
     return (
         <div className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 {/* Total Reviews Card */}
                 <div className="bg-white rounded-2xl p-5 border border-border/50 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
                     <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
@@ -96,6 +113,20 @@ export function ReviewsManager() {
                         <h3 className="text-2xl font-bold text-slate-800 flex items-baseline gap-1.5">
                             {averageRating}
                             <span className="text-xs text-muted-foreground font-semibold">/ 5.0</span>
+                        </h3>
+                    </div>
+                </div>
+
+                {/* Homepage Reviews Card */}
+                <div className="bg-white rounded-2xl p-5 border border-border/50 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+                    <div className="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center flex-shrink-0">
+                        <MessageSquare className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Ulasan di Beranda</p>
+                        <h3 className="text-2xl font-bold text-slate-800 flex items-baseline gap-1.5">
+                            {reviews.filter(r => r.show_on_homepage).length}
+                            <span className="text-xs text-muted-foreground font-semibold">/ 10</span>
                         </h3>
                     </div>
                 </div>
@@ -142,6 +173,27 @@ export function ReviewsManager() {
                                     <p className="text-slate-600 text-sm italic leading-relaxed">
                                         "{r.comment || 'Tidak ada komentar tertulis.'}"
                                     </p>
+
+                                    {/* Toggle sakelar "Tampilkan di Beranda" */}
+                                    <div className="flex items-center justify-between bg-slate-50/50 p-2.5 rounded-xl border border-slate-100/60 mt-3">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-bold text-slate-700">Tampilkan di Beranda</span>
+                                            <span className="text-[10px] text-muted-foreground">Tampilkan ulasan ini di beranda depan</span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleToggleHomepage(r.id, r.show_on_homepage)}
+                                            disabled={togglingId === r.id}
+                                            className={`w-10 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 disabled:opacity-50 ${
+                                                r.show_on_homepage ? 'bg-green-500' : 'bg-slate-300'
+                                            }`}
+                                        >
+                                            <div
+                                                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-all duration-300 ${
+                                                    r.show_on_homepage ? 'translate-x-4' : 'translate-x-0'
+                                                }`}
+                                            />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Footer: Transaction Items & Date */}
