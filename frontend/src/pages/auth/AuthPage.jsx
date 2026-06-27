@@ -17,6 +17,9 @@ const AuthPage = () => {
 
   // Sync state with URL path
   useEffect(() => {
+    // Clear any previous authentication errors when switching pages
+    useAuthStore.setState({ error: null });
+
     if (location.pathname === '/register') {
       setIsSignUp(true);
     } else {
@@ -137,16 +140,18 @@ const AuthPage = () => {
       });
       // After successful register, switch to login view automatically
       addToast('Pendaftaran berhasil! Silakan masuk.', 'success');
-      setLoginData(prev => ({ ...prev, email: registerData.email }));
+      // Clear forms
+      setRegisterData({ username: '', email: '', password: '', confirmPassword: '' });
+      setLoginData({ email: '', password: '' });
       navigate('/login');
     } catch (error) {
       if (error.response?.status === 409) {
-        addToast('Email sudah terdaftar. Silakan masuk.', 'info');
-        setLoginData(prev => ({ ...prev, email: registerData.email }));
-        navigate('/login');
+        addToast('Email sudah terdaftar. Silakan gunakan email lain.', 'error');
+        setRegisterErrors(prev => ({ ...prev, email: 'Email sudah terdaftar. Silakan gunakan email lain.' }));
       } else {
         console.error(error);
-        addToast(authError || 'Pendaftaran gagal. Silakan coba lagi.', 'error');
+        const errMsg = error.response?.data?.message || 'Pendaftaran gagal. Silakan coba lagi.';
+        addToast(errMsg, 'error');
       }
     }
   };
