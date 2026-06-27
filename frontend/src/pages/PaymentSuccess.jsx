@@ -10,11 +10,11 @@ export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('order_id') || 'ORDER-XXXXXX';
   const transactionStatus = searchParams.get('transaction_status') || 'Settlement';
-  const { clearCart } = useCartStore();
+  const { clearSelectedItems } = useCartStore();
 
   useEffect(() => {
-    // Clear the cart on success page load to prevent "Keranjang Kosong" flashing on checkout page
-    clearCart();
+    // Clear only selected items on success page load
+    clearSelectedItems();
 
     // Sync status with backend
     const syncStatus = async () => {
@@ -26,7 +26,7 @@ export default function PaymentSuccess() {
       }
     };
     syncStatus();
-  }, [orderId, clearCart]);
+  }, [orderId, clearSelectedItems]);
 
   return (
     <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans">

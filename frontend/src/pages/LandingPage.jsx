@@ -147,9 +147,9 @@ export default function LandingPage() {
       </section>
 
       {/* Top Picks / Bestseller Section */}
-      <section id="bestsellers" className="py-20 bg-background">
+      <section id="bestsellers" className="pt-16 pb-10 bg-background">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="mb-16 text-center space-y-3">
+          <div className="mb-8 text-center space-y-2">
             <h2 className="text-3xl font-heading font-black text-slate-800 tracking-tight md:text-4xl">
               Menu Terfavorit (Bestsellers)
             </h2>
@@ -172,7 +172,7 @@ export default function LandingPage() {
             )}
           </div>
 
-          <div className="mt-16 text-center">
+          <div className="mt-8 text-center">
             <Link to="/menu">
               <Button variant="outline" className="h-12 px-8 text-sm font-black transition-all border-2 rounded-full border-primary text-primary hover:bg-primary hover:text-white">
                 Lihat Semua Menu
@@ -184,9 +184,9 @@ export default function LandingPage() {
       </section>
 
       {/* How it Works Section */}
-      <section className="py-20 bg-slate-50/50">
+      <section className="py-12 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-3">
+          <div className="text-center mb-8 space-y-2">
             <h2 className="text-3xl font-heading font-black text-slate-800 tracking-tight md:text-4xl">
               Cara Pesan Mudah & Cepat
             </h2>
@@ -234,9 +234,9 @@ export default function LandingPage() {
 
 
       {/* Social Proof (Testimonials) Section */}
-      <section className="py-20 bg-background">
+      <section className="pt-16 pb-12 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-3">
+          <div className="text-center mb-8 space-y-2">
             <h2 className="text-3xl font-heading font-black text-slate-800 tracking-tight md:text-4xl">
               Ulasan Pelanggan Setia
             </h2>

@@ -2,9 +2,16 @@ const { CartItem, Product } = require('../../models');
 const { NotFoundError } = require('../../common/responses/error-response');
 
 const getCart = async (userId) => {
-    return await CartItem.findAll({
+    const items = await CartItem.findAll({
         where: { user_id: userId },
         include: [{ model: Product, as: 'product' }]
+    });
+    return items.map(item => {
+        const itemVal = item.get({ plain: true });
+        if (itemVal.product && itemVal.product.image_url && itemVal.product.image_url.startsWith('/')) {
+            itemVal.product.image_url = `${process.env.BASE_URL}${itemVal.product.image_url}`;
+        }
+        return itemVal;
     });
 };
 

@@ -18,6 +18,7 @@ import { Sidebar } from '../components/dashboard/Sidebar'
 import { WelcomeBanner } from '../components/dashboard/WelcomeBanner'
 import { SettingsTab } from '../components/dashboard/SettingsTab'
 import { RecentActivity } from '../components/dashboard/RecentActivity'
+import { getFallbackFoodImage, handleImageError, getProductImageUrl } from '../lib/imageFallback'
 import { Button } from '../components/ui/button'
 
 const Dashboard = () => {
@@ -156,7 +157,12 @@ const Dashboard = () => {
                                         items.map((item) => (
                                             <div key={item.id} className="flex gap-3 text-xs">
                                                 <div className="h-12 w-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                                                    <img src={item.image_url || 'https://placehold.co/100'} alt={item.name} className="w-full h-full object-cover" />
+                                                    <img 
+                                                        src={getProductImageUrl(item.image_url) || getFallbackFoodImage(item.name)} 
+                                                        alt={item.name} 
+                                                        className="w-full h-full object-cover" 
+                                                        onError={(e) => handleImageError(e, item.name)}
+                                                    />
                                                 </div>
                                                 <div className="flex-1">
                                                     <h4 className="font-semibold text-gray-800 line-clamp-1">{item.name}</h4>

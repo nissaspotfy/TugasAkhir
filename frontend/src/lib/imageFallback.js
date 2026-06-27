@@ -36,3 +36,11 @@ export const getFallbackFoodImage = (menuName = "") => {
 export const handleImageError = (e, name) => {
     e.target.src = getFallbackFoodImage(name);
 };
+
+export const getProductImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/v1';
+    const backendUrl = base.replace('/v1', '');
+    return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};

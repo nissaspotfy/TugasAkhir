@@ -8,11 +8,20 @@ import { ArrowLeft, Trash2, MapPin, Plus, CheckCircle2, ArrowRight, Home, Pencil
 import Navbar from '../components/Navbar';
 import AddressModal from '../components/AddressModal';
 import SelectAddressModal from '../components/SelectAddressModal';
-import { getFallbackFoodImage, handleImageError } from '../lib/imageFallback';
+import { getFallbackFoodImage, handleImageError, getProductImageUrl } from '../lib/imageFallback';
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items, removeItem, updateQuantity, updateItemNote, getTotalPrice, clearCart } = useCartStore();
+  const { 
+    items, 
+    removeItem, 
+    updateQuantity, 
+    updateItemNote, 
+    clearCart, 
+    getSelectedItems, 
+    getSelectedTotalPrice 
+  } = useCartStore();
+  const checkoutItems = getSelectedItems();
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState(null); 
   const [loading, setLoading] = useState(false);
@@ -31,7 +40,7 @@ export default function Checkout() {
   const [addressToEdit, setAddressToEdit] = useState(null);
   const [shippingLoading, setShippingLoading] = useState(false);
 
-  const subtotal = getTotalPrice();
+  const subtotal = getSelectedTotalPrice();
   const discount = appliedPromo ? appliedPromo.discount_amount : 0;
   const shippingCost = shippingType === 'delivery' && selectedShipping ? selectedShipping.cost : 0;
   const finalTotal = (subtotal - discount) + shippingCost;
@@ -154,7 +163,7 @@ export default function Checkout() {
       setLoading(true);
       try {
           const payload = {
-              items: items.map(item => ({
+              items: checkoutItems.map(item => ({
                   productId: item.id,
                   quantity: item.quantity,
                   note: item.note || ''
@@ -215,13 +224,13 @@ export default function Checkout() {
       }
   };
 
-  if (items.length === 0) {
+  if (checkoutItems.length === 0) {
       return (
           <div className="min-h-screen font-sans bg-gray-50">
               <Navbar />
               <div className="flex flex-col items-center justify-center pt-20">
                   <h2 className="mb-4 text-2xl font-bold">Keranjang Kosong</h2>
-                  <Link to="/">
+                  <Link to="/menu">
                       <Button>Belanja Sekarang</Button>
                   </Link>
               </div>
@@ -236,7 +245,7 @@ export default function Checkout() {
       <div className="max-w-5xl px-4 pt-36 mx-auto">
         <div className="mb-6">
           <button 
-            onClick={() => navigate('/', { state: { openCart: true } })}
+            onClick={() => navigate('/cart')}
             className="inline-flex items-center gap-2 text-gray-500 hover:text-primary hover:bg-gray-100 transition-all px-4 py-2 rounded-full -ml-4 cursor-pointer font-bold text-sm border-none bg-transparent"
             title="Kembali ke Keranjang"
           >
@@ -299,37 +308,16 @@ export default function Checkout() {
                                     <MapPin className="text-accent" /> Alamat Pengiriman
                                 </h2>
                                 <div className="flex items-center gap-2">
-                                    {addresses.length > 0 && (
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            onClick={() => setIsSelectAddressModalOpen(true)}
-                                            className="border-accent text-accent hover:bg-accent hover:text-white"
-                                        >
-                                            Ganti Alamat
-                                        </Button>
-                                    )}
-                                    {addresses.length < 5 && (
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            onClick={() => {
-                                                setAddressToEdit(null);
-                                                setIsAddressModalOpen(true);
-                                            }}
-                                            className="flex items-center gap-1 border-accent text-accent hover:bg-accent hover:text-white active:bg-accent/90 active:text-white focus:text-white transition-colors"
-                                        >
-                                            <Plus className="w-4 h-4" /> Tambah
-                                        </Button>
-                                    )}
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => setIsSelectAddressModalOpen(true)}
+                                        className="border-accent text-accent hover:bg-accent hover:text-white cursor-pointer"
+                                    >
+                                        Ganti Alamat
+                                    </Button>
                                 </div>
                             </div>
-
-                            {addresses.length >= 5 && (
-                                <p className="text-xs text-amber-600 font-bold mb-3 animate-pulse">
-                                    ⚠️ Batas maksimum 5 alamat tersimpan telah tercapai.
-                                </p>
-                            )}
 
                             {addresses.length === 0 ? (
                                 <div className="py-6 text-center text-gray-500 rounded-lg bg-gray-50">
@@ -418,14 +406,14 @@ export default function Checkout() {
                     <div className="mb-6 border-t border-b border-gray-100 py-4">
                         <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center justify-between">
                             <span>Daftar Barang</span>
-                            <span className="text-xs text-muted-foreground font-normal">{items.length} Menu</span>
+                            <span className="text-xs text-muted-foreground font-normal">{checkoutItems.length} Menu</span>
                         </h3>
                         <div className="space-y-4">
-                            {items.map((item) => (
+                            {checkoutItems.map((item) => (
                                 <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-50 last:pb-0 last:border-0 text-xs">
                                     <div className="flex-shrink-0 w-16 h-16 overflow-hidden bg-gray-100 rounded-lg">
                                         <img 
-                                            src={item.image_url || getFallbackFoodImage(item.name)} 
+                                            src={getProductImageUrl(item.image_url) || getFallbackFoodImage(item.name)} 
                                             alt={item.name} 
                                             className="object-cover w-full h-full" 
                                             onError={(e) => handleImageError(e, item.name)}

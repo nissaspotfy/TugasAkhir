@@ -6,6 +6,7 @@ import Dashboard from '../pages/Dashboard';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import Checkout from '../pages/Checkout';
 import Menu from '../pages/Menu';
+import Cart from '../pages/Cart';
 import PaymentSuccess from '../pages/PaymentSuccess';
 import PrivateRoute from '../components/PrivateRoute'; 
 
@@ -48,6 +49,14 @@ const AppRouter = () => {
           element={
             <PrivateRoute allowedRoles={['User']}>
               <Checkout />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/cart" 
+          element={
+            <PrivateRoute allowedRoles={['User']}>
+              <Cart />
             </PrivateRoute>
           } 
         />
