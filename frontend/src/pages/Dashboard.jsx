@@ -130,7 +130,7 @@ const Dashboard = () => {
                                 )}
                             </button>
 
-                            <div 
+                            <div
                                 className={`
                                     absolute right-0 mt-4 w-80 bg-white text-gray-800 rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 
                                     transition-all duration-300 ease-in-out origin-top-right
@@ -143,7 +143,7 @@ const Dashboard = () => {
                                         <X size={16} />
                                     </button>
                                 </div>
-                                
+
                                 <div className="max-h-64 overflow-y-auto p-4 space-y-4">
                                     {items.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center py-6 text-center">
@@ -162,7 +162,7 @@ const Dashboard = () => {
                                                     <h4 className="font-semibold text-gray-800 line-clamp-1">{item.name}</h4>
                                                     <p className="text-gray-500">{item.quantity} x Rp {item.price.toLocaleString()}</p>
                                                 </div>
-                                                <button 
+                                                <button
                                                     onClick={() => removeItem(item.id)}
                                                     className="text-red-400 hover:text-red-600 self-center"
                                                 >
@@ -179,8 +179,8 @@ const Dashboard = () => {
                                             <span>Total</span>
                                             <span>Rp {getTotalPrice().toLocaleString()}</span>
                                         </div>
-                                        <Button 
-                                            onClick={handleCheckout} 
+                                        <Button
+                                            onClick={handleCheckout}
                                             className="w-full bg-primary hover:bg-primary/90 text-white font-bold rounded-full py-4 text-xs"
                                         >
                                             Checkout
@@ -203,7 +203,7 @@ const Dashboard = () => {
                                 )}
                             </button>
 
-                            <div 
+                            <div
                                 className={`
                                     absolute right-0 mt-4 w-80 bg-white text-gray-800 rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 
                                     transition-all duration-300 ease-in-out origin-top-right
@@ -213,15 +213,15 @@ const Dashboard = () => {
                                 <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
                                     <h3 className="font-bold text-base">Notifikasi</h3>
                                     {unreadCount > 0 && (
-                                        <button 
-                                            onClick={() => markAllAsRead()} 
+                                        <button
+                                            onClick={() => markAllAsRead()}
                                             className="text-xs text-primary hover:text-primary/85 font-bold transition-colors"
                                         >
                                             Tandai semua dibaca
                                         </button>
                                     )}
                                 </div>
-                                
+
                                 <div className="max-h-80 overflow-y-auto divide-y divide-gray-100">
                                     {notifications.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
@@ -230,8 +230,8 @@ const Dashboard = () => {
                                         </div>
                                     ) : (
                                         notifications.map((notif) => (
-                                            <div 
-                                                key={notif.id} 
+                                            <div
+                                                key={notif.id}
                                                 onClick={() => {
                                                     if (!notif.is_read) markAsRead(notif.id);
                                                 }}

@@ -5,8 +5,8 @@ const { geocodeAddress } = require('../shipping/shipping');
 
 const addAddress = async (userId, data) => {
     const count = await Address.count({ where: { user_id: userId } });
-    if (count >= 3) {
-        throw new BadRequestError('Maksimal 3 alamat yang dapat disimpan.');
+    if (count >= 5) {
+        throw new BadRequestError('Maksimal 5 alamat yang dapat disimpan.');
     }
 
     // Geocode if missing coords

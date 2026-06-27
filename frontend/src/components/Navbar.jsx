@@ -21,6 +21,13 @@ export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
+        if (location.state?.openCart) {
+            setIsCartOpen(true);
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state]);
+
+    useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 50) {
                 setIsScrolled(true);

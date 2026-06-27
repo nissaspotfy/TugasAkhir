@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Package, 
-  ShoppingBag, 
-  Tag, 
-  Users, 
-  Menu as MenuIcon, 
-  LogOut, 
-  Settings, 
-  LayoutDashboard, 
+import {
+  Package,
+  ShoppingBag,
+  Tag,
+  Users,
+  Menu as MenuIcon,
+  LogOut,
+  Settings,
+  LayoutDashboard,
   Star,
   Bell,
   X,
@@ -144,8 +144,8 @@ export default function AdminDashboard() {
 
       {/* Overlay for mobile sidebar */}
       {isSidebarOpen && (
-        <div 
-          onClick={() => setIsSidebarOpen(false)} 
+        <div
+          onClick={() => setIsSidebarOpen(false)}
           className="fixed inset-0 z-40 bg-black/40 md:hidden transition-opacity"
         />
       )}
@@ -161,77 +161,77 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-4">
-             {/* Notification Bell & Dropdown */}
-             <div className="relative" ref={notifRef}>
-                <button 
-                   onClick={() => setIsNotifOpen(!isNotifOpen)}
-                   className="p-2 relative hover:bg-secondary rounded-full text-muted-foreground hover:text-primary transition-colors"
-                   title="Notifikasi"
-                >
-                   <Bell size={20} className={unreadCount > 0 ? "text-primary" : ""} />
-                   {unreadCount > 0 && (
-                      <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border border-white"></span>
-                   )}
-                </button>
+            {/* Notification Bell & Dropdown */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="p-2 relative hover:bg-secondary rounded-full text-muted-foreground hover:text-primary transition-colors"
+                title="Notifikasi"
+              >
+                <Bell size={20} className={unreadCount > 0 ? "text-primary" : ""} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border border-white"></span>
+                )}
+              </button>
 
-                <div 
-                    className={`
+              <div
+                className={`
                         absolute right-0 mt-4 w-80 bg-white text-gray-800 rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 
                         transition-all duration-300 ease-in-out origin-top-right
                         ${isNotifOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}
                     `}
-                >
-                    <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
-                        <h3 className="font-bold text-base">Notifikasi Admin</h3>
-                        {unreadCount > 0 && (
-                            <button 
-                                onClick={() => markAllAsRead()} 
-                                className="text-xs text-primary hover:text-primary/85 font-bold transition-colors"
-                            >
-                                Tandai semua dibaca
-                            </button>
-                        )}
-                    </div>
-                    
-                    <div className="max-h-80 overflow-y-auto divide-y divide-gray-100">
-                        {notifications.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                                <span className="text-4xl mb-2">🔔</span>
-                                <p className="text-xs text-gray-500 font-medium font-sans">Belum ada notifikasi baru.</p>
-                            </div>
-                        ) : (
-                            notifications.map((notif) => (
-                                <div 
-                                    key={notif.id} 
-                                    onClick={() => {
-                                        if (!notif.is_read) markAsRead(notif.id);
-                                    }}
-                                    className={`p-4 hover:bg-secondary/20 transition-colors cursor-pointer flex gap-3 ${!notif.is_read ? 'bg-blue-50/40' : ''}`}
-                                >
-                                    <div className="mt-0.5 flex-shrink-0">
-                                        {notif.type === 'payment' ? (
-                                            <div className="p-1.5 bg-green-50 text-green-600 rounded-lg"><CheckCircle2 size={14} /></div>
-                                        ) : notif.type === 'order' ? (
-                                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><Package size={14} /></div>
-                                        ) : (
-                                            <div className="p-1.5 bg-gray-50 text-gray-600 rounded-lg"><Info size={14} /></div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 space-y-1 font-sans">
-                                        <div className="flex justify-between items-start">
-                                            <h4 className={`text-xs font-bold ${!notif.is_read ? 'text-gray-900 font-black' : 'text-gray-600'}`}>{notif.title}</h4>
-                                            <span className="text-[9px] text-gray-400 font-medium">
-                                                {new Date(notif.createdAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}
-                                            </span>
-                                        </div>
-                                        <p className="text-xs text-gray-500 leading-normal">{notif.message}</p>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
+              >
+                <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
+                  <h3 className="font-bold text-base">Notifikasi Admin</h3>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={() => markAllAsRead()}
+                      className="text-xs text-primary hover:text-primary/85 font-bold transition-colors"
+                    >
+                      Tandai semua dibaca
+                    </button>
+                  )}
                 </div>
-             </div>
+
+                <div className="max-h-80 overflow-y-auto divide-y divide-gray-100">
+                  {notifications.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                      <span className="text-4xl mb-2">🔔</span>
+                      <p className="text-xs text-gray-500 font-medium font-sans">Belum ada notifikasi baru.</p>
+                    </div>
+                  ) : (
+                    notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        onClick={() => {
+                          if (!notif.is_read) markAsRead(notif.id);
+                        }}
+                        className={`p-4 hover:bg-secondary/20 transition-colors cursor-pointer flex gap-3 ${!notif.is_read ? 'bg-blue-50/40' : ''}`}
+                      >
+                        <div className="mt-0.5 flex-shrink-0">
+                          {notif.type === 'payment' ? (
+                            <div className="p-1.5 bg-green-50 text-green-600 rounded-lg"><CheckCircle2 size={14} /></div>
+                          ) : notif.type === 'order' ? (
+                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><Package size={14} /></div>
+                          ) : (
+                            <div className="p-1.5 bg-gray-50 text-gray-600 rounded-lg"><Info size={14} /></div>
+                          )}
+                        </div>
+                        <div className="flex-1 space-y-1 font-sans">
+                          <div className="flex justify-between items-start">
+                            <h4 className={`text-xs font-bold ${!notif.is_read ? 'text-gray-900 font-black' : 'text-gray-600'}`}>{notif.title}</h4>
+                            <span className="text-[9px] text-gray-400 font-medium">
+                              {new Date(notif.createdAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 leading-normal">{notif.message}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </header>
 

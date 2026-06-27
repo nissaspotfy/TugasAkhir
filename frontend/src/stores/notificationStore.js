@@ -23,7 +23,7 @@ const useNotificationStore = create((set, get) => ({
   markAsRead: async (id) => {
     try {
       await api.post(`/notifications/${id}/read`);
-      const updatedNotifications = get().notifications.map(n => 
+      const updatedNotifications = get().notifications.map(n =>
         n.id === id ? { ...n, is_read: true } : n
       );
       const unreadCount = updatedNotifications.filter(n => !n.is_read).length;
