@@ -340,7 +340,7 @@ export default function LandingPage() {
                   <MapPin className="w-6 h-6 text-primary" />
                   <span className="text-xl font-bold">Lokasi Produksi</span>
                 </div>
-                <p className="pl-10 opacity-90 text-white/80">Jl. Goalpara No. 45, Sukabumi, Jawa Barat</p>
+                <p className="pl-10 opacity-90 text-white/80">Jl. Perum Pesona Limbangan, Kecamatan Sukaraja Goalpara, Sukabumi.</p>
               </div>
             </div>
           </div>

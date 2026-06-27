@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Linkedin, Globe } from 'lucide-react';
+import { Instagram, Globe } from 'lucide-react';
 import { useToast } from './ui/ToastProvider';
 
 export default function Footer() {
@@ -82,15 +82,7 @@ export default function Footer() {
               >
                 <Instagram size={20} />
               </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="p-2 text-slate-400 hover:text-white bg-slate-900 hover:bg-[#bf3843] rounded-lg transition-all border border-slate-800"
-                title="LinkedIn"
-              >
-                <Linkedin size={20} />
-              </a>
+
               <a 
                 href="#" 
                 onClick={handlePlaceholderClick} 
