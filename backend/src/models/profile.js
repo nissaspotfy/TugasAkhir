@@ -49,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     notification_promo: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

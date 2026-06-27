@@ -34,7 +34,8 @@ export function SettingsTab({ user }) {
                     setFormData({
                         full_name: prof.full_name || '',
                         bio: prof.bio || '',
-                        email: prof.email || ''
+                        email: prof.email || '',
+                        phone: prof.phone || ''
                     });
                     if (prof.profilePicture) {
                         setPreviewImage(prof.profilePicture);
@@ -101,6 +102,7 @@ export function SettingsTab({ user }) {
             if (formData.full_name) data.append("full_name", formData.full_name);
             if (formData.bio) data.append("bio", formData.bio);
             if (formData.email) data.append("email", formData.email);
+            if (formData.phone !== undefined) data.append("phone", formData.phone);
             if (selectedFile) data.append("profile_picture", selectedFile);
 
             const res = await api.put('/users/update-profile', data, {
@@ -116,6 +118,7 @@ export function SettingsTab({ user }) {
                     name: updatedProfile.full_name || formData.full_name || user.name,
                     email: updatedProfile.email || formData.email || user.email,
                     bio: updatedProfile.bio || formData.bio || user.bio,
+                    phone: updatedProfile.phone || formData.phone || user.phone,
                     profilePicture: updatedProfile.profilePicture || previewImage
                 });
             }
@@ -278,6 +281,18 @@ export function SettingsTab({ user }) {
                             name="email" 
                             disabled={!isEditing}
                             value={formData.email !== undefined ? formData.email : (user?.email || "")} 
+                            onChange={handleInputChange} 
+                            className={`transition-all outline-none ${!isEditing ? 'bg-secondary/10 border-border/50 text-foreground cursor-default' : 'bg-white border-border focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20'}`} 
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <label className="text-sm font-bold text-foreground">Nomor Telepon / Handphone</label>
+                        <Input 
+                            name="phone" 
+                            type="tel"
+                            placeholder={isEditing ? "Contoh: 081234567890" : ""}
+                            disabled={!isEditing}
+                            value={formData.phone !== undefined ? formData.phone : (user?.phone || "")} 
                             onChange={handleInputChange} 
                             className={`transition-all outline-none ${!isEditing ? 'bg-secondary/10 border-border/50 text-foreground cursor-default' : 'bg-white border-border focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20'}`} 
                         />

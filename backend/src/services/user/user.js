@@ -26,8 +26,10 @@ const getAllCustomers = async () => {
     });
 
     return customers.map(c => {
+        const userProfile = c.profiles?.[0];
+        const profilePicture = userProfile && userProfile.profilePicture ? `${process.env.BASE_URL}${userProfile.profilePicture}` : null;
         const primaryAddress = c.addresses?.find(a => a.is_primary) || c.addresses?.[0];
-        const phoneNumber = primaryAddress ? primaryAddress.phone_number : '-';
+        const phoneNumber = userProfile?.phone || (primaryAddress ? primaryAddress.phone_number : '-');
         
         return {
             id: c.id,
@@ -36,7 +38,8 @@ const getAllCustomers = async () => {
             totalOrders: c.transactions?.length || 0,
             status: 'Aktif',
             joinedDate: new Date(c.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-            phoneNumber
+            phoneNumber,
+            profilePicture
         };
     });
 };

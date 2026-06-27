@@ -123,9 +123,20 @@ export function CustomersManager() {
                 {selectedCustomer && (
                     <div className="space-y-6">
                         <div className="flex flex-col items-center justify-center p-6 bg-secondary/10 rounded-2xl border border-border/50 text-center">
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white text-4xl font-bold font-heading mb-4 shadow-lg shadow-orange-500/20">
-                                {selectedCustomer.name.charAt(0).toUpperCase()}
-                            </div>
+                            {selectedCustomer.profilePicture ? (
+                                <div className="w-24 h-24 rounded-full overflow-hidden mb-4 shadow-lg border-2 border-primary/20">
+                                    <img 
+                                        src={selectedCustomer.profilePicture} 
+                                        alt="Profile" 
+                                        className="w-full h-full object-cover object-center"
+                                        onError={(e) => { e.target.style.display = 'none'; }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white text-4xl font-bold font-heading mb-4 shadow-lg shadow-orange-500/20">
+                                    {selectedCustomer.name.charAt(0).toUpperCase()}
+                                </div>
+                            )}
                             <h3 className="font-black text-2xl text-foreground font-heading">{selectedCustomer.name}</h3>
                             <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-1">#CUST-00{selectedCustomer.id}</p>
                         </div>
@@ -149,19 +160,7 @@ export function CustomersManager() {
                             </div>
                         </div>
 
-                        <div className="pt-2">
-                            <div className={`p-4 rounded-2xl border-l-[6px] flex items-center justify-between ${selectedCustomer.status === "Aktif" ? "bg-green-50 border-green-500" : "bg-red-50 border-red-500"}`}>
-                                <div>
-                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Izin Akses Website</p>
-                                    <p className={`text-sm font-black ${selectedCustomer.status === "Aktif" ? "text-green-700" : "text-red-700"}`}>
-                                        {selectedCustomer.status === "Aktif" ? "Akun Normal Beroperasi" : "Akses Telah Diblokir"}
-                                    </p>
-                                </div>
-                                <div className={`p-3 rounded-full ${selectedCustomer.status === "Aktif" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}>
-                                    {selectedCustomer.status === "Aktif" ? <ShieldCheck size={24} /> : <ShieldAlert size={24} />}
-                                </div>
-                            </div>
-                        </div>
+                        {/* Website access box removed as requested */}
                     </div>
                 )}
             </Modal>

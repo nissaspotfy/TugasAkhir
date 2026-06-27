@@ -5,6 +5,7 @@ const profileSchema = JOI.object({
     bio : JOI.string().max(160).optional(),
     profilePicture: JOI.string().uri().optional(),
     dateOfBirth: JOI.date().iso().optional(),
+    phone: JOI.string().max(20).allow('', null).optional(),
 });
 
 const updateProfileSchema = JOI.object({
@@ -12,6 +13,7 @@ const updateProfileSchema = JOI.object({
     bio: JOI.string().max(160).optional(),
     profilePicture: JOI.string().uri().optional(),
     dateOfBirth: JOI.date().iso().optional(),
+    phone: JOI.string().max(20).allow('', null).optional(),
     full_name: JOI.string().max(100).optional(),
     email: JOI.string().email().optional(),
     notification_promo: JOI.boolean().optional(),

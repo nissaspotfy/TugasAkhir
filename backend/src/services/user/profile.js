@@ -47,6 +47,7 @@ const getProfile = async (userId) => {
         username: profileExist.username,
         bio: profileExist.bio,
         dateOfBirth: profileExist.dateOfBirth,
+        phone: profileExist.phone || '',
         profilePicture: profileExist.profilePicture ? `${process.env.BASE_URL}${profileExist.profilePicture}` : null,
         full_name: userExist.name,
         email: userExist.email,
@@ -107,7 +108,7 @@ const updateProfile = async (body, files, userId) => {
             throw new BaseError(StatusCodes.BAD_REQUEST, error.details[0].message);
         }
 
-        const { username, bio, dateOfBirth, full_name, email, notification_promo, notification_status } = body;
+        const { username, bio, dateOfBirth, phone, full_name, email, notification_promo, notification_status } = body;
         const userExist = await user.findByPk(userId);
         if (!userExist) {
             throw new NotFoundError('User not found');
@@ -166,6 +167,7 @@ const updateProfile = async (body, files, userId) => {
         if (username !== undefined) profileUpdateFields.username = username;
         if (bio !== undefined) profileUpdateFields.bio = bio;
         if (dateOfBirth !== undefined) profileUpdateFields.dateOfBirth = dateOfBirth;
+        if (phone !== undefined) profileUpdateFields.phone = phone;
         if (notification_promo !== undefined) {
             profileUpdateFields.notification_promo = notification_promo === 'true' || notification_promo === true;
         }
@@ -183,6 +185,7 @@ const updateProfile = async (body, files, userId) => {
             username: updatedProfile.username,
             bio: updatedProfile.bio,
             dateOfBirth: updatedProfile.dateOfBirth,
+            phone: updatedProfile.phone || '',
             profilePicture: updatedProfile.profilePicture ? `${process.env.BASE_URL}${updatedProfile.profilePicture}` : null,
             full_name: updatedUser.name,
             email: updatedUser.email,
