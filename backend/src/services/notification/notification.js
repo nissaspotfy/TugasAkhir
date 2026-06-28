@@ -21,6 +21,31 @@ const createNotification = async ({ userId, title, message, type = 'info' }) => 
         message,
         type
     });
+
+    try {
+        if (global.io) {
+            const payload = {
+                id: newNotification.id,
+                user_id: newNotification.user_id,
+                title: newNotification.title,
+                message: newNotification.message,
+                type: newNotification.type,
+                is_read: newNotification.is_read,
+                createdAt: newNotification.createdAt
+            };
+
+            if (userId) {
+                global.io.to(`room_user_${userId}`).emit('notification_received', payload);
+                console.log(`Socket emitted user notification to room_user_${userId}`);
+            } else {
+                global.io.to('room_admin').emit('notification_received', payload);
+                console.log('Socket emitted admin notification to room_admin');
+            }
+        }
+    } catch (err) {
+        console.error('Socket notification emit failed:', err.message);
+    }
+
     return newNotification;
 };
 

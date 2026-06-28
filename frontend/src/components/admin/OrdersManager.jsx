@@ -57,28 +57,56 @@ export function OrdersManager() {
         }
     };
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const res = await api.get("/transactions"); 
-                if(res.data.data && res.data.data.length > 0) {
-                    setOrders(res.data.data);
-                } else {
-                    throw new Error("fallback");
-                }
-            } catch (error) {
-                console.error(error);
-                setOrders([
-                    { id: 101, user: { username: "nissanurs", email: "nissa@example.com" }, items: [{ product: { name: "Nasi Goreng Spesial", price: 25000 }, quantity: 2 }], createdAt: new Date().toISOString(), total_amount: 50000, status: "pending", note: "Pedas, karet pisah" },
-                    { id: 102, user: { username: "budi", email: "budi@example.com" }, items: [{ product: { name: "Es Teh Manis", price: 5000 }, quantity: 3 }], createdAt: new Date(Date.now() - 3600000).toISOString(), total_amount: 15000, status: "paid", note: "" },
-                    { id: 103, user: { username: "siti", email: "siti@example.com" }, items: [{ product: { name: "Ayam Bakar", price: 30000 }, quantity: 1 }], createdAt: new Date(Date.now() - 86400000).toISOString(), total_amount: 30000, status: "failed", note: "" },
-                ])
-            } finally {
-                setLoading(false);
+    const fetchOrders = async () => {
+        try {
+            const res = await api.get("/transactions"); 
+            if(res.data.data && res.data.data.length > 0) {
+                setOrders(res.data.data);
+            } else {
+                throw new Error("fallback");
             }
-        };
+        } catch (error) {
+            console.error(error);
+            setOrders([
+                { id: 101, user: { username: "nissanurs", email: "nissa@example.com" }, items: [{ product: { name: "Nasi Goreng Spesial", price: 25000 }, quantity: 2 }], createdAt: new Date().toISOString(), total_amount: 50000, status: "pending", note: "Pedas, karet pisah" },
+                { id: 102, user: { username: "budi", email: "budi@example.com" }, items: [{ product: { name: "Es Teh Manis", price: 5000 }, quantity: 3 }], createdAt: new Date(Date.now() - 3600000).toISOString(), total_amount: 15000, status: "paid", note: "" },
+                { id: 103, user: { username: "siti", email: "siti@example.com" }, items: [{ product: { name: "Ayam Bakar", price: 30000 }, quantity: 1 }], createdAt: new Date(Date.now() - 86400000).toISOString(), total_amount: 30000, status: "failed", note: "" },
+            ])
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchOrders();
     }, []);
+
+    // Listen for socket notifications to refresh order list and open detail modal instantly (admin-side)
+    useEffect(() => {
+        const handleNewNotification = async (e) => {
+            console.log("Real-time trigger admin orders reload", e.detail);
+            await fetchOrders();
+            
+            // If the detail modal is currently open, update its detailed data as well
+            if (isDetailModalOpen && selectedOrder) {
+                try {
+                    const res = await api.get("/transactions");
+                    if (res.data.data && res.data.data.length > 0) {
+                        const updated = res.data.data.find(o => o.id === selectedOrder.id);
+                        if (updated) {
+                            setSelectedOrder(updated);
+                        }
+                    }
+                } catch (err) {
+                    console.error("Failed to refresh detail order in real-time", err);
+                }
+            }
+        };
+        window.addEventListener('new_notification_alert', handleNewNotification);
+        return () => {
+            window.removeEventListener('new_notification_alert', handleNewNotification);
+        };
+    }, [isDetailModalOpen, selectedOrder]);
 
     const getStatusStyle = (status) => {
         if(status === "success") return "bg-green-100 text-green-700";

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '../lib/api';
+import { connectSocket, disconnectSocket as cleanupSocket } from '../lib/socket';
 
 const useNotificationStore = create((set, get) => ({
   notifications: [],
@@ -43,8 +44,32 @@ const useNotificationStore = create((set, get) => ({
     }
   },
 
+  initializeSocket: (token) => {
+    if (!token) return;
+    const socket = connectSocket(token);
+
+    socket.off('notification_received'); // Clean up duplicate listeners
+    socket.on('notification_received', (newNotif) => {
+      console.log('Socket notification received:', newNotif);
+
+      const currentNotifications = get().notifications;
+      const updatedNotifications = [newNotif, ...currentNotifications];
+      const unreadCount = updatedNotifications.filter(n => !n.is_read).length;
+
+      set({ notifications: updatedNotifications, unreadCount });
+
+      // Dispatch a custom browser event for instant updates across components
+      window.dispatchEvent(new CustomEvent('new_notification_alert', { detail: newNotif }));
+    });
+  },
+
+  disconnectSocket: () => {
+    cleanupSocket();
+  },
+
   clearNotifications: () => {
     set({ notifications: [], unreadCount: 0 });
+    cleanupSocket();
   }
 }));
 

@@ -359,19 +359,46 @@ export function RecentActivity() {
       }
    };
 
-   useEffect(() => {
-      const fetchTransactions = async () => {
-         try {
-            const res = await api.get('/transactions/my-transactions');
-            setTransactions(res.data.data);
-         } catch (error) {
-            console.error("Failed to fetch transactions", error);
-         } finally {
-            setLoading(false);
-         }
-      };
-      fetchTransactions();
-   }, []);
+    const fetchTransactions = async () => {
+       try {
+          const res = await api.get('/transactions/my-transactions');
+          setTransactions(res.data.data);
+       } catch (error) {
+          console.error("Failed to fetch transactions", error);
+       } finally {
+          setLoading(false);
+       }
+    };
+
+    useEffect(() => {
+       fetchTransactions();
+    }, []);
+
+    // Listen for socket notifications to refresh order list and open detail modal instantly
+    useEffect(() => {
+       const handleNewNotification = async (e) => {
+          console.log("Real-time trigger transaction list reload", e.detail);
+          try {
+             const res = await api.get('/transactions/my-transactions');
+             const newTransactions = res.data.data;
+             setTransactions(newTransactions);
+             
+             // If order detail modal is open, update its detailed data in real-time
+             if (detailModalOpen && detailOrder) {
+                const updated = newTransactions.find(t => t.id === detailOrder.id);
+                if (updated) {
+                   setDetailOrder(updated);
+                }
+             }
+          } catch (error) {
+             console.error("Failed to refresh transactions in real-time", error);
+          }
+       };
+       window.addEventListener('new_notification_alert', handleNewNotification);
+       return () => {
+          window.removeEventListener('new_notification_alert', handleNewNotification);
+       };
+    }, [detailModalOpen, detailOrder]);
 
    const handleOpenReview = (id, menu) => {
       setSelectedOrder({ id, menu });
