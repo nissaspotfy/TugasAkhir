@@ -1,17 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { TrendingUp, ShoppingBag, Users, Clock, AlertTriangle, Award, RefreshCw } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Users, AlertTriangle, Award, RefreshCw, Download } from 'lucide-react';
 
 export function AnalyticsDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchAnalytics = async () => {
+  // Timeframe and Date Filter States
+  const [timeframe, setTimeframe] = useState('month');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const calculateDates = (selectedTimeframe) => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    let start = '';
+    let end = todayStr;
+
+    if (selectedTimeframe === 'today') {
+      start = todayStr;
+    } else if (selectedTimeframe === 'week') {
+      const pastWeek = new Date();
+      pastWeek.setDate(today.getDate() - 7);
+      start = pastWeek.toISOString().split('T')[0];
+    } else if (selectedTimeframe === 'month') {
+      const pastMonth = new Date();
+      pastMonth.setDate(today.getDate() - 30);
+      start = pastMonth.toISOString().split('T')[0];
+    }
+    
+    return { start, end };
+  };
+
+  const fetchAnalytics = async (start = startDate, end = endDate) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/transactions/analytics');
+      const params = {};
+      if (start && end) {
+        params.startDate = start;
+        params.endDate = end;
+      }
+      const res = await api.get('/transactions/analytics', { params });
       setData(res.data.data);
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
@@ -23,10 +55,155 @@ export function AnalyticsDashboard() {
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    // Initial load: 30 days
+    const { start, end } = calculateDates('month');
+    setStartDate(start);
+    setEndDate(end);
+    fetchAnalytics(start, end);
   }, []);
 
-  if (loading) {
+  const handleTimeframeChange = (selectedTimeframe) => {
+    setTimeframe(selectedTimeframe);
+    if (selectedTimeframe !== 'custom') {
+      const { start, end } = calculateDates(selectedTimeframe);
+      setStartDate(start);
+      setEndDate(end);
+      fetchAnalytics(start, end);
+    } else {
+      // For custom, initialize with past month's range until user modifies it
+      const { start, end } = calculateDates('month');
+      setStartDate(start);
+      setEndDate(end);
+      fetchAnalytics(start, end);
+    }
+  };
+
+  const handleCustomDateChange = (start, end) => {
+    setStartDate(start);
+    setEndDate(end);
+    if (start && end) {
+      fetchAnalytics(start, end);
+    }
+  };
+
+  const handleExportPDF = () => {
+    if (!data) return;
+    const { summary, topProducts, lowStockProducts } = data;
+    
+    const printWindow = window.open('', '_blank');
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Laporan Analisis Penjualan D'raosan</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #334155; line-height: 1.5; }
+            .header { text-align: center; border-bottom: 3px double #cbd5e1; padding-bottom: 20px; margin-bottom: 30px; }
+            .header h1 { margin: 0; font-size: 26px; color: #991b1b; font-weight: 800; tracking-wide: 1px; }
+            .header p { margin: 6px 0 0; font-size: 13px; color: #64748b; font-weight: 500; }
+            .meta { display: flex; justify-content: space-between; font-size: 11px; color: #475569; margin-bottom: 30px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+            .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+            .card { background: #f8fafc; padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center; }
+            .card p { margin: 0 0 6px; font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+            .card h3 { margin: 0; font-size: 18px; color: #0f172a; font-weight: 800; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px; }
+            th, td { border: 1px solid #e2e8f0; padding: 12px 14px; text-align: left; }
+            th { background: #f1f5f9; font-weight: bold; color: #334155; }
+            h2 { font-size: 16px; border-left: 4px solid #b91c1c; padding-left: 10px; margin-top: 35px; margin-bottom: 15px; color: #0f172a; font-weight: 800; }
+            .badge { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; border: 1px solid #fca5a5; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>LAPORAN ANALISIS PENJUALAN D'RAOSAN</h1>
+            <p>Sistem Informasi Manajemen Rumah Makan D'raosan - Laporan Resmi</p>
+          </div>
+          <div class="meta">
+            <div><strong>Waktu Ekspor:</strong> ${new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })}</div>
+            <div><strong>Periode Laporan:</strong> ${timeframe === 'custom' ? `${startDate} s/d ${endDate}` : timeframe === 'today' ? 'Hari Ini' : timeframe === 'week' ? 'Minggu Ini' : 'Bulan Ini'}</div>
+          </div>
+          
+          <h2>Ringkasan Kinerja</h2>
+          <div class="grid">
+            <div class="card">
+              <p>Total Pendapatan</p>
+              <h3>Rp ${summary.totalRevenue.toLocaleString('id-ID')}</h3>
+            </div>
+            <div class="card">
+              <p>Pesanan Sukses</p>
+              <h3>${summary.totalSuccessfulOrders}</h3>
+            </div>
+            <div class="card">
+              <p>Pelanggan Baru</p>
+              <h3>${summary.newCustomers}</h3>
+            </div>
+            <div class="card">
+              <p>Pesanan Tertunda</p>
+              <h3>${summary.pendingOrders}</h3>
+            </div>
+          </div>
+
+          <h2>Top 5 Menu Terlaris</h2>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 80px;">Peringkat</th>
+                <th>Nama Menu</th>
+                <th>Harga Satuan</th>
+                <th>Total Terjual</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${topProducts.map((p, idx) => `
+                <tr>
+                  <td><strong>#${idx + 1}</strong></td>
+                  <td style="font-weight: 600; color: #0f172a;">${p.name}</td>
+                  <td>Rp ${p.price?.toLocaleString('id-ID')}</td>
+                  <td><strong>${p.total_sold} Porsi</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <h2>Peringatan Stok Rendah (&lt; 5)</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Nama Menu</th>
+                <th>Stok Tersisa</th>
+                <th>Harga Satuan</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${lowStockProducts.length === 0 ? `
+                <tr>
+                  <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">Semua persediaan produk dalam kondisi aman.</td>
+                </tr>
+              ` : lowStockProducts.map(p => `
+                <tr>
+                  <td style="font-weight: 600; color: #0f172a;">${p.name}</td>
+                  <td style="color: #b91c1c; font-weight: bold;">${p.stock} porsi</td>
+                  <td>Rp ${p.price?.toLocaleString('id-ID')}</td>
+                  <td><span class="badge">Perlu Restock</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
+  if (loading && !data) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
         <RefreshCw className="w-8 h-8 animate-spin text-primary" />
@@ -42,7 +219,7 @@ export function AnalyticsDashboard() {
         <h3 className="text-lg font-bold mb-2">Terjadi Kesalahan</h3>
         <p className="text-muted-foreground text-sm mb-6">{error || 'Data tidak dapat dimuat'}</p>
         <button 
-          onClick={fetchAnalytics}
+          onClick={() => fetchAnalytics()}
           className="px-6 py-2 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors"
         >
           Coba Lagi
@@ -192,6 +369,21 @@ export function AnalyticsDashboard() {
   return (
     <div className="space-y-6">
       
+      {/* Top Header Panel with Document Export */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-border/50 shadow-sm">
+        <div>
+          <h2 className="text-xl font-heading font-black text-slate-800">Ringkasan Analitik</h2>
+          <p className="text-xs text-muted-foreground">Laporan ringkas kinerja penjualan dan persediaan D'raosan</p>
+        </div>
+        <button
+          onClick={handleExportPDF}
+          className="inline-flex items-center justify-center gap-2 bg-[#B91C1C] hover:bg-[#9c1818] text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] border-none cursor-pointer"
+        >
+          <Download className="w-4 h-4" />
+          <span>Ekspor Laporan PDF</span>
+        </button>
+      </div>
+      
       {/* 1. Scorecards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         
@@ -221,12 +413,53 @@ export function AnalyticsDashboard() {
         </div>
       </div>
 
-      {/* 2. Sales Trend Section */}
-      <div className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+      {/* 2. Sales Trend Section with Dropdown Selection */}
+      <div className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm relative">
+        {loading && (
+          <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-2xl">
+            <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        )}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-lg font-heading font-black text-slate-800">Tren Penjualan</h3>
-            <p className="text-xs text-muted-foreground">Grafik total nominal penjualan harian dalam 30 hari terakhir</p>
+            <p className="text-xs text-muted-foreground">
+              {timeframe === 'custom' 
+                ? `Grafik total nominal penjualan kustom: ${startDate} s/d ${endDate}`
+                : `Grafik total nominal penjualan harian (${timeframe === 'today' ? 'Hari Ini' : timeframe === 'week' ? 'Minggu Ini' : '30 Hari Terakhir'})`
+              }
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {timeframe === 'custom' && (
+              <div className="flex items-center gap-1.5">
+                <input 
+                  type="date" 
+                  value={startDate}
+                  onChange={(e) => handleCustomDateChange(e.target.value, endDate)}
+                  className="px-2 py-1 text-xs border rounded-lg focus:outline-none bg-slate-50 cursor-pointer"
+                />
+                <span className="text-xs text-muted-foreground">s/d</span>
+                <input 
+                  type="date" 
+                  value={endDate}
+                  onChange={(e) => handleCustomDateChange(startDate, e.target.value)}
+                  className="px-2 py-1 text-xs border rounded-lg focus:outline-none bg-slate-50 cursor-pointer"
+                />
+              </div>
+            )}
+            
+            <select
+              value={timeframe}
+              onChange={(e) => handleTimeframeChange(e.target.value)}
+              className="px-3 py-1.5 text-xs font-bold border rounded-lg focus:outline-none bg-white cursor-pointer"
+            >
+              <option value="today">Hari Ini</option>
+              <option value="week">Minggu Ini</option>
+              <option value="month">Bulan Ini</option>
+              <option value="custom">Kustom Tanggal</option>
+            </select>
           </div>
         </div>
         {renderSalesChart()}
@@ -236,7 +469,12 @@ export function AnalyticsDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Top 5 Best Sellers */}
-        <div className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm flex flex-col">
+        <div className="bg-white rounded-2xl p-6 border border-border/50 shadow-sm flex flex-col relative">
+          {loading && (
+            <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-2xl">
+              <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          )}
           <div className="flex items-center gap-2 mb-6">
             <Award className="text-yellow-500 w-5 h-5" />
             <h3 className="text-lg font-heading font-black text-slate-800">Top 5 Menu Terlaris</h3>

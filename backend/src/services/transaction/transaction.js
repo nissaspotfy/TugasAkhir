@@ -485,18 +485,62 @@ const deleteTransaction = async (id) => {
     return { id };
 };
 
-const getAnalyticsData = async () => {
+const getAnalyticsData = async (query = {}) => {
+    const { startDate, endDate } = query;
+    let dateWhere = {};
+    let userDateWhere = {};
+
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        
+        dateWhere = {
+            createdAt: {
+                [Op.between]: [start, end]
+            }
+        };
+        userDateWhere = {
+            createdAt: {
+                [Op.between]: [start, end]
+            }
+        };
+    } else {
+        // Default to last 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        thirtyDaysAgo.setHours(0, 0, 0, 0);
+        
+        dateWhere = {
+            createdAt: {
+                [Op.gte]: thirtyDaysAgo
+            }
+        };
+        
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        userDateWhere = {
+            createdAt: {
+                [Op.gte]: startOfMonth
+            }
+        };
+    }
+
     // 1. Total Revenue (total_amount of transactions with status = 'paid', 'processing', 'success')
     const totalRevenue = await Transaction.sum('total_amount', {
         where: { 
-            status: { [Op.in]: ['paid', 'processing', 'success'] }
+            status: { [Op.in]: ['paid', 'processing', 'success'] },
+            ...dateWhere
         }
     }) || 0;
 
     // 2. Total Successful Orders (count of transactions with status = 'paid', 'processing', 'success')
     const totalSuccessfulOrders = await Transaction.count({
         where: { 
-            status: { [Op.in]: ['paid', 'processing', 'success'] }
+            status: { [Op.in]: ['paid', 'processing', 'success'] },
+            ...dateWhere
         }
     });
 
@@ -504,16 +548,10 @@ const getAnalyticsData = async () => {
     const userRole = await role.findOne({ where: { nama_role: 'User' } });
     let newCustomersCount = 0;
     if (userRole) {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-
         newCustomersCount = await user.count({
             where: {
                 role_id: userRole.id,
-                createdAt: {
-                    [Op.gte]: startOfMonth
-                }
+                ...userDateWhere
             }
         });
     }
@@ -529,11 +567,22 @@ const getAnalyticsData = async () => {
             'product_id',
             [sequelize.fn('SUM', sequelize.col('quantity')), 'total_sold']
         ],
-        include: [{
-            model: Product,
-            as: 'product',
-            attributes: ['name', 'price', 'image_url']
-        }],
+        include: [
+            {
+                model: Product,
+                as: 'product',
+                attributes: ['name', 'price', 'image_url']
+            },
+            {
+                model: Transaction,
+                as: 'transaction',
+                attributes: [],
+                where: {
+                    status: { [Op.in]: ['paid', 'processing', 'success'] },
+                    ...dateWhere
+                }
+            }
+        ],
         group: ['product_id', 'product.id'],
         order: [[sequelize.literal('total_sold'), 'DESC']],
         limit: 5
@@ -550,10 +599,6 @@ const getAnalyticsData = async () => {
     });
 
     // 7. Sales Trend (revenue by date for last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    thirtyDaysAgo.setHours(0, 0, 0, 0);
-
     const salesTrendRaw = await Transaction.findAll({
         attributes: [
             [sequelize.fn('DATE', sequelize.col('createdAt')), 'date'],
@@ -561,9 +606,7 @@ const getAnalyticsData = async () => {
         ],
         where: {
             status: { [Op.in]: ['paid', 'processing', 'success'] },
-            createdAt: {
-                [Op.gte]: thirtyDaysAgo
-            }
+            ...dateWhere
         },
         group: [sequelize.fn('DATE', sequelize.col('createdAt'))],
         order: [[sequelize.fn('DATE', sequelize.col('createdAt')), 'ASC']]

@@ -109,7 +109,7 @@ const deleteTransactionController = async (req, res, next) => {
 
 const getAnalyticsController = async (req, res, next) => {
     try {
-        const result = await getAnalyticsData();
+        const result = await getAnalyticsData(req.query);
         return res.status(StatusCodes.OK).json(
             new BaseResponse({
                 status: StatusCodes.OK,
