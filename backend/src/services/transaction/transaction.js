@@ -490,6 +490,18 @@ const getAnalyticsData = async (query = {}) => {
     let dateWhere = {};
     let userDateWhere = {};
 
+    // Top 5 Best Sellers should always be calculated over a rolling 30-day window
+    // to prevent the panel from showing up empty at the start of a day/timeframe.
+    const rollingThirtyDaysAgo = new Date();
+    rollingThirtyDaysAgo.setDate(rollingThirtyDaysAgo.getDate() - 30);
+    rollingThirtyDaysAgo.setHours(0, 0, 0, 0);
+
+    const bestSellersDateWhere = {
+        createdAt: {
+            [Op.gte]: rollingThirtyDaysAgo
+        }
+    };
+
     if (startDate && endDate) {
         const start = new Date(startDate);
         start.setHours(0, 0, 0, 0);
@@ -579,7 +591,7 @@ const getAnalyticsData = async (query = {}) => {
                 attributes: [],
                 where: {
                     status: { [Op.in]: ['paid', 'processing', 'success'] },
-                    ...dateWhere
+                    ...bestSellersDateWhere
                 }
             }
         ],

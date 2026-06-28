@@ -142,7 +142,7 @@ export function AnalyticsDashboard() {
             </div>
           </div>
 
-          <h2>Top 5 Menu Terlaris</h2>
+          <h2>Top 5 Menu Terlaris (30 Hari Terakhir)</h2>
           <table>
             <thead>
               <tr>
@@ -477,7 +477,7 @@ export function AnalyticsDashboard() {
           )}
           <div className="flex items-center gap-2 mb-6">
             <Award className="text-yellow-500 w-5 h-5" />
-            <h3 className="text-lg font-heading font-black text-slate-800">Top 5 Menu Terlaris</h3>
+            <h3 className="text-lg font-heading font-black text-slate-800">Top 5 Menu Terlaris (30 Hari Terakhir)</h3>
           </div>
           
           {topProducts.length === 0 ? (
