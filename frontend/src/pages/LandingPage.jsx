@@ -15,7 +15,7 @@ import {
   Smartphone,
   Quote
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import api from '../lib/api';
@@ -31,7 +31,19 @@ export default function LandingPage() {
   const addItem = useCartStore((state) => state.addItem);
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, user } = useAuthStore();
+
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.getElementById(location.hash.substring(1));
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     if (isAuthenticated && getUserRole(user) === 'admin') {

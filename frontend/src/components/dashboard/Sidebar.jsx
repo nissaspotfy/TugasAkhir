@@ -26,11 +26,13 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, activeTab, setActiveT
             `}>
                 <div className="h-full flex flex-col">
                     {/* Logo Area */}
-                    <div className="h-20 flex items-center px-6 border-b border-border/50">
-                        <img src="/logodr.png" alt="Draosan Logo" className="h-10 w-auto" />
+                    <div className="h-24 flex items-center justify-center px-6 border-b border-border/50 relative">
+                        <Link to="/" className="hover:scale-105 transition-transform flex items-center justify-center">
+                            <img src="/logodr.png" alt="Draosan Logo" className="h-14 w-auto object-contain" />
+                        </Link>
                         <button
                             onClick={() => setIsSidebarOpen(false)}
-                            className="ml-auto md:hidden text-muted-foreground"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 md:hidden text-muted-foreground hover:text-primary transition-colors"
                         >
                             <X size={24} />
                         </button>

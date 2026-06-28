@@ -17,9 +17,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Logo & Description */}
           <div className="space-y-4">
-            <div className="flex items-center justify-start mb-4">
+            <Link to="/" className="flex items-center justify-start mb-4 hover:scale-105 transition-transform block w-fit">
               <img src="/logodr.png" alt="D'raosan Logo" className="h-16 w-auto object-contain brightness-0 invert" />
-            </div>
+            </Link>
             <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
               Nikmati kelezatan kuliner Sunda autentik Sukabumi yang diolah dengan bahan segar pilihan kualitas terbaik, disajikan hangat langsung ke meja Anda.
             </p>

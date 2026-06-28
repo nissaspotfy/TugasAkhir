@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import api from '../lib/api';
 import useCartStore from '../stores/cartStore';
 import useAuthStore, { getUserRole } from '../stores/authStore';
@@ -145,8 +144,6 @@ export default function Menu() {
               )}
            </div>
         </div>
-
-        <Footer />
     </div>
   );
 }

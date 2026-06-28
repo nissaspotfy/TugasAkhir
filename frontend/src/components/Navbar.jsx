@@ -18,6 +18,40 @@ export default function Navbar() {
     const isHome = location.pathname === '/';
     const [isScrolled, setIsScrolled] = useState(false);
 
+    const getLinkClass = (path) => {
+        let isActive = false;
+        if (path === '/') {
+            isActive = location.pathname === '/' && location.hash !== '#footer';
+        } else if (path === '#footer') {
+            isActive = location.pathname === '/' && location.hash === '#footer';
+        } else if (path === '/dashboard') {
+            isActive = location.pathname === '/dashboard' || location.pathname.startsWith('/admin');
+        } else {
+            isActive = location.pathname === path;
+        }
+
+        return isActive 
+            ? "text-primary font-bold transition-colors" 
+            : "text-foreground hover:text-primary transition-colors";
+    };
+
+    const getMobileLinkClass = (path) => {
+        let isActive = false;
+        if (path === '/') {
+            isActive = location.pathname === '/' && location.hash !== '#footer';
+        } else if (path === '#footer') {
+            isActive = location.pathname === '/' && location.hash === '#footer';
+        } else if (path === '/dashboard') {
+            isActive = location.pathname === '/dashboard' || location.pathname.startsWith('/admin');
+        } else {
+            isActive = location.pathname === path;
+        }
+
+        return isActive 
+            ? "text-primary font-bold transition-colors py-2 border-b border-gray-100" 
+            : "text-gray-800 hover:text-primary transition-colors py-2 border-b border-gray-100";
+    };
+
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 50) {
@@ -53,21 +87,29 @@ export default function Navbar() {
         navigate('/login');
     };
 
+    const handleLogoClick = () => {
+        if (location.pathname === '/') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.history.pushState("", document.title, window.location.pathname + window.location.search);
+        }
+    };
+
     return (
         <nav className="fixed w-full top-0 left-0 z-50 bg-background text-foreground border-b border-muted transition-colors font-sans">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                <Link to="/" className="flex items-center text-2xl tracking-tight hover:scale-105 transition-transform">
+                <Link to="/" onClick={handleLogoClick} className="flex items-center text-2xl tracking-tight hover:scale-105 transition-transform">
                     <img src="/logodr.png" alt="D'raosan Logo" className="h-14 w-auto object-contain" />
                 </Link>
 
                 <div className="hidden md:flex items-center space-x-8 font-medium">
-                    <a href="/#home" className="hover:text-primary transition-colors">Beranda</a>
-                    <Link to="/menu" className="hover:text-primary transition-colors">Menu</Link>
-                    <a href="#footer" className="hover:text-primary transition-colors">Hubungi Kami</a>
+                    <a href="/#home" className={getLinkClass('/')}>Beranda</a>
+                    <Link to="/menu" className={getLinkClass('/menu')}>Menu</Link>
+                    <a href="/#footer" className={getLinkClass('#footer')}>Hubungi Kami</a>
                     {isAuthenticated && (
                         <Link
                             to={getUserRole(user) === 'admin' ? "/admin/dashboard" : "/dashboard"}
-                            className="hover:text-primary transition-colors"
+                            onClick={() => localStorage.setItem('customerActiveTab', 'dashboard')}
+                            className={getLinkClass('/dashboard')}
                         >
                             Dashboard
                         </Link>
@@ -79,7 +121,11 @@ export default function Navbar() {
                     <div className="relative">
                         <Link
                             to="/cart"
-                            className="relative p-2 hover:bg-muted rounded-full transition-colors block"
+                            className={`relative p-2 rounded-full transition-colors block ${
+                                location.pathname === '/cart' 
+                                    ? 'bg-muted/80 text-primary border border-primary/20' 
+                                    : 'hover:bg-muted text-foreground'
+                            }`}
                         >
                             <ShoppingCart className="h-6 w-6 text-primary" />
                             {getItemCount() > 0 && (
@@ -127,14 +173,14 @@ export default function Navbar() {
                 `}
             >
                 <div className="px-6 py-4 flex flex-col space-y-4 font-bold text-sm">
-                    <a href="/#home" onClick={() => setIsMenuOpen(false)} className="hover:text-primary transition-colors py-2 border-b border-gray-100">Beranda</a>
-                    <Link to="/menu" onClick={() => setIsMenuOpen(false)} className="hover:text-primary transition-colors py-2 border-b border-gray-100">Menu</Link>
-                    <a href="#footer" onClick={() => setIsMenuOpen(false)} className="hover:text-primary transition-colors py-2 border-b border-gray-100">Hubungi Kami</a>
+                    <a href="/#home" onClick={() => setIsMenuOpen(false)} className={getMobileLinkClass('/')}>Beranda</a>
+                    <Link to="/menu" onClick={() => setIsMenuOpen(false)} className={getMobileLinkClass('/menu')}>Menu</Link>
+                    <a href="/#footer" onClick={() => setIsMenuOpen(false)} className={getMobileLinkClass('#footer')}>Hubungi Kami</a>
                     {isAuthenticated && (
                         <Link
                             to={getUserRole(user) === 'admin' ? "/admin/dashboard" : "/dashboard"}
-                            onClick={() => setIsMenuOpen(false)}
-                            className="hover:text-primary transition-colors py-2 border-b border-gray-100"
+                            onClick={() => { setIsMenuOpen(false); localStorage.setItem('customerActiveTab', 'dashboard'); }}
+                            className={getMobileLinkClass('/dashboard')}
                         >
                             Dashboard
                         </Link>
