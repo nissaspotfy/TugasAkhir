@@ -174,7 +174,7 @@ export function OrdersManager() {
         if (!selectedOrder) return;
         let prevStatus = null;
         if (selectedOrder.status === 'pending') prevStatus = 'cancelled';
-        else if (selectedOrder.status === 'paid') prevStatus = 'pending';
+        else if (selectedOrder.status === 'paid') prevStatus = 'cancelled';   // Tolak / Batalkan
         else if (selectedOrder.status === 'processing') prevStatus = 'paid';
 
         if (prevStatus) {
@@ -183,6 +183,7 @@ export function OrdersManager() {
     };
 
     const handlePrintInvoice = (order) => {
+        const shortId = order.id.slice(-8);  // 8 karakter terakhir UUID
         const itemsHtml = order.items.map(item => `
             <tr>
                 <td style="padding: 10px; border-bottom: 1px solid #ddd;">
@@ -222,7 +223,7 @@ export function OrdersManager() {
                     </div>
                     <div style="text-align: right;">
                         <h2 style="margin: 0; color: #bf3843;">INVOICE</h2>
-                        <div>No: #ORD-${order.id}</div>
+                        <div>No: #ORD-${shortId}</div>
                         <div>Tanggal: ${new Date(order.createdAt).toLocaleDateString("id-ID")}</div>
                     </div>
                 </div>
@@ -287,6 +288,7 @@ export function OrdersManager() {
     };
 
     const handlePrintReceipt = (order) => {
+        const shortId = order.id.slice(-8);  // 8 karakter terakhir UUID
         const itemsHtml = order.items.map(item => `
             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                 <span>
@@ -327,7 +329,7 @@ export function OrdersManager() {
                 
                 <div>
                     Tanggal: ${new Date(order.createdAt).toLocaleDateString("id-ID")}<br/>
-                    No. Resi: #ORD-${order.id}<br/>
+                    No. Resi: #ORD-${shortId}<br/>
                     Pelanggan: ${order.user?.username || "Pelanggan"}<br/>
                     Layanan: ${order.shipping_provider === 'Ambil Sendiri' ? 'Ambil Sendiri' : 'Kirim'}
                 </div>
@@ -404,7 +406,7 @@ export function OrdersManager() {
             secondaryButtonText = "Batalkan Pesanan";
         } else if (selectedOrder.status === 'paid') {
             mainButtonText = "Terima & Proses Masak";
-            secondaryButtonText = "Kembalikan ke Menunggu";
+            secondaryButtonText = "Tolak / Batalkan Pesanan";
         } else if (selectedOrder.status === 'processing') {
             mainButtonText = "Tandai Selesai";
             secondaryButtonText = "Kembalikan ke Lunas";

@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -6,8 +8,6 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { verifyToken } = require('./common/utils/jwt');
 const { user, role } = require('./models');
-
-require('dotenv').config();
 
 const middlewares = require('./middlewares');
 const router = require('./routes/index');

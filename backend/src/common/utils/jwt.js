@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = process.env;
 
 
 /**
@@ -10,7 +9,7 @@ const { JWT_SECRET } = process.env;
  * @returns {string} - The generated JWT token
  */
 
-const generateToken = (payload, secret = JWT_SECRET, expiresIn = '24h') => {
+const generateToken = (payload, secret = process.env.JWT_SECRET, expiresIn = '24h') => {
      try {
         return jwt.sign(payload, secret, { expiresIn });
      } catch (error) {
@@ -26,7 +25,7 @@ const generateToken = (payload, secret = JWT_SECRET, expiresIn = '24h') => {
  * @throws {Error} - jika token tidak valid
  */
 
-const verifyToken = (token, secret = JWT_SECRET, ignoreExpiration = false) => {
+const verifyToken = (token, secret = process.env.JWT_SECRET, ignoreExpiration = false) => {
     try {
         return jwt.verify(token, secret, { ignoreExpiration });
     } catch (error) {

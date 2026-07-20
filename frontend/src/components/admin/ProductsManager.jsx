@@ -177,6 +177,13 @@ export function ProductsManager() {
 
     const handleSave = async (e) => {
         e.preventDefault();
+
+        // Validasi: gambar wajib diisi saat menambah produk baru
+        if (modalMode === "add" && !formData.image_file) {
+            addToast("Gambar produk wajib diunggah sebelum menyimpan.", "error");
+            return;
+        }
+
         try {
             const data = new FormData();
             data.append("name", formData.name);
@@ -405,7 +412,10 @@ export function ProductsManager() {
                                 />
                             </div>
                             <div>
-                                <label className="text-sm font-bold text-muted-foreground block mb-2">Gambar Produk</label>
+                                <label className="text-sm font-bold text-muted-foreground block mb-2">
+                                    Gambar Produk
+                                    {modalMode === "add" && <span className="text-red-500 ml-1">*</span>}
+                                </label>
                                 <div className="relative group">
                                     {/* Hidden file input */}
                                     <input 
@@ -455,10 +465,15 @@ export function ProductsManager() {
                                         </label>
                                     )}
                                 </div>
-                                {formData.image_file && (
+                                {formData.image_file ? (
                                     <p className="text-[10px] text-emerald-600 font-bold mt-1.5 flex items-center gap-1">
                                         <span className="inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
                                         File terpilih: {formData.image_file.name}
+                                    </p>
+                                ) : modalMode === "add" && (
+                                    <p className="text-[10px] text-red-500 font-semibold mt-1.5 flex items-center gap-1">
+                                        <span className="inline-block w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                        Gambar produk wajib diunggah
                                     </p>
                                 )}
                             </div>
