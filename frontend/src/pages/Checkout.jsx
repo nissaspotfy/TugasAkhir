@@ -210,6 +210,7 @@ export default function Checkout() {
                           console.error("Failed to cancel pending transaction on close:", err);
                       } finally {
                           setLoading(false);
+                          navigate('/checkout');
                       }
                   }
               });
