@@ -59,6 +59,10 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.ENUM('pending', 'paid', 'processing', 'success', 'failed', 'cancelled'),
       defaultValue: 'pending'
+    },
+    snap_token: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     sequelize,

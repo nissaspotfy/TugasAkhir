@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, ArrowRight, Home } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import Navbar from '../components/Navbar';
@@ -8,11 +8,20 @@ import api from '../lib/api';
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const orderId = searchParams.get('order_id') || 'ORDER-XXXXXX';
   const transactionStatus = searchParams.get('transaction_status') || 'Settlement';
   const { clearSelectedItems } = useCartStore();
 
   useEffect(() => {
+    // Guard: jika status bukan settlement/capture, kembali ke checkout
+    // Ini menangani kasus Midtrans redirect langsung dengan status pending
+    const validStatuses = ['settlement', 'capture'];
+    if (!validStatuses.includes(transactionStatus.toLowerCase())) {
+      navigate('/checkout', { replace: true });
+      return;
+    }
+
     // Clear only selected items on success page load
     clearSelectedItems();
 
@@ -26,7 +35,7 @@ export default function PaymentSuccess() {
       }
     };
     syncStatus();
-  }, [orderId, clearSelectedItems]);
+  }, [orderId, transactionStatus, clearSelectedItems, navigate]);
 
   return (
     <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans">

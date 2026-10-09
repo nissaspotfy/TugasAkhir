@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import api from '../../lib/api';
 import { useToast } from '../ui/ToastProvider';
-import { Star, X, ChevronLeft, ChevronRight, Eye, Receipt, CalendarDays, MapPin, Package, Truck, RefreshCw, CheckCircle } from 'lucide-react';
+import { Star, X, ChevronLeft, ChevronRight, Eye, Receipt, CalendarDays, MapPin, Package, Truck, RefreshCw, CheckCircle, CreditCard } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import useCartStore from '../../stores/cartStore';
 import { Modal } from '../admin/Modal';
 
-export function TableRow({ id, menu, total, status, date, onReview, hasReview, onReorder, onDetail, onCancel }) {
+export function TableRow({ id, menu, total, status, date, onReview, hasReview, onReorder, onDetail, onCancel, onSimulatePay }) {
    const getStatusInfo = (stat) => {
       switch (stat) {
          case 'success':
@@ -72,6 +72,17 @@ export function TableRow({ id, menu, total, status, date, onReview, hasReview, o
 
 
 
+               {/* Bayar - hanya untuk pending */}
+               {status === 'pending' && onSimulatePay && (
+                  <button
+                     onClick={onSimulatePay}
+                     className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors cursor-pointer border-none"
+                     title="Bayar Sekarang"
+                  >
+                     <CreditCard size={16} />
+                  </button>
+               )}
+
                {/* Pesan Lagi */}
                {(status === 'paid' || status === 'processing' || status === 'success') && (
                   <button
@@ -93,6 +104,8 @@ function ReviewModal({ isOpen, onClose, onSubmit, orderId, menuName }) {
    const [reviewText, setReviewText] = useState("");
 
    if (!isOpen) return null;
+
+
 
    const handleSubmit = () => {
       onSubmit(orderId, rating, reviewText);
@@ -371,6 +384,19 @@ export function RecentActivity() {
     };
 
     useEffect(() => {
+       // Load Midtrans Script for paying from dashboard
+       const midtransClientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
+       const scriptId = 'midtrans-script';
+       if (midtransClientKey && !document.getElementById(scriptId)) {
+          const script = document.createElement('script');
+          script.id = scriptId;
+          script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+          script.setAttribute('data-client-key', midtransClientKey);
+          document.body.appendChild(script);
+       }
+    }, []);
+
+    useEffect(() => {
        fetchTransactions();
     }, []);
 
@@ -458,6 +484,43 @@ export function RecentActivity() {
       }
    };
 
+   const handlePayNow = (transaction) => {
+      if (!transaction.snap_token) {
+         addToast("Token pembayaran tidak ditemukan. Silakan buat pesanan baru.", "error");
+         return;
+      }
+      if (window.snap) {
+         window.snap.pay(transaction.snap_token, {
+            onSuccess: async function (result) {
+               const ts = result.transaction_status;
+               if (ts === 'settlement' || ts === 'capture') {
+                  try {
+                     await api.post(`/transactions/${transaction.id}/sync`);
+                  } catch (err) {
+                     console.error('Failed to sync:', err);
+                  }
+                  navigate(`/payment-success?order_id=${result.order_id || ''}&transaction_status=${ts}`);
+               } else {
+                  // Jika masih pending (e.g. Sandbox return pending), jangan lakukan apa-apa
+                  addToast("Pembayaran belum diselesaikan.", "warning");
+               }
+            },
+            onPending: function (result) {
+               addToast("Menunggu pembayaran Anda.", "info");
+            },
+            onError: function (result) {
+               addToast('Pembayaran gagal!', "error");
+            },
+            onClose: function () {
+               // Jangan lakukan redirect atau cancel, biarkan user tetap di Dashboard
+               addToast("Anda menutup halaman pembayaran.", "warning");
+            }
+         });
+      } else {
+         addToast('Sistem pembayaran gagal dimuat.', "error");
+      }
+   };
+
    const handleSubmitReview = async (orderId, rating, text) => {
       try {
          await api.post('/reviews', {
@@ -536,6 +599,7 @@ export function RecentActivity() {
                                  onReorder={() => handleReorder(t)}
                                  onDetail={() => handleOpenDetail(t)}
                                  onCancel={() => handleCancelOrder(t.id)}
+                                 onSimulatePay={() => handlePayNow(t)}
                               />
                            );
                         })

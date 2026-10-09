@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useCartStore from '../stores/cartStore';
 import api from '../lib/api';
@@ -39,6 +39,10 @@ export default function Checkout() {
   const [isSelectAddressModalOpen, setIsSelectAddressModalOpen] = useState(false);
   const [addressToEdit, setAddressToEdit] = useState(null);
   const [shippingLoading, setShippingLoading] = useState(false);
+  const [pendingTransactionId, setPendingTransactionId] = useState(null);
+  // Flag: true ketika onClose (klik X) sudah dieksekusi
+  // Mencegah onSuccess yang juga ikut terpanggil di sandbox dari override navigate
+  const snapClosedRef = useRef(false);
 
   const subtotal = getSelectedTotalPrice();
   const discount = appliedPromo ? appliedPromo.discount_amount : 0;
@@ -182,40 +186,41 @@ export default function Checkout() {
           const { transactionId, snapToken } = res.data.data;
 
           if (window.snap) {
+              snapClosedRef.current = false;
               window.snap.pay(snapToken, {
                   onSuccess: async function(result){
-                      try {
-                          await api.post(`/transactions/${transactionId}/sync`);
-                      } catch (err) {
-                          console.error("Failed to sync transaction status:", err);
+                      // Cek status transaksi dari result Midtrans
+                      const ts = result.transaction_status;
+                      
+                      // Hanya redirect ke payment-success jika BENAR-BENAR sudah dibayar
+                      if (ts === 'settlement' || ts === 'capture') {
+                          setPendingTransactionId(null);
+                          try {
+                              await api.post(`/transactions/${transactionId}/sync`);
+                          } catch (err) {
+                              console.error('Failed to sync:', err);
+                          }
+                          navigate(`/payment-success?order_id=${result.order_id || ''}&transaction_status=${ts}`);
+                      } else {
+                          // Status masih 'pending' = belum bayar (user klik X di halaman QRIS/VA)
+                          // Midtrans sandbox tetap fire onSuccess tapi statusnya pending
+                          // Tetap di halaman checkout tanpa membatalkan
+                          alert('Pembayaran belum diselesaikan.');
                       }
-                      navigate(`/payment-success?order_id=${result.order_id || ''}&transaction_status=${result.transaction_status || ''}`);
                   },
-                  onPending: async function(result){
-                      try {
-                          await api.post(`/transactions/${transactionId}/sync`);
-                      } catch (err) {
-                          console.error("Failed to sync transaction status:", err);
-                      }
-                      navigate(`/payment-success?order_id=${result.order_id || ''}&transaction_status=${result.transaction_status || ''}`);
+                  onPending: function(result){
+                      setPendingTransactionId(transactionId);
                   },
                   onError: function(result){
-                      alert("Pembayaran gagal!");
+                      alert('Pembayaran gagal!');
                   },
-                  onClose: async function(){
-                      setLoading(true);
-                      try {
-                          await api.post(`/transactions/${transactionId}/cancel-pending`);
-                      } catch (err) {
-                          console.error("Failed to cancel pending transaction on close:", err);
-                      } finally {
-                          setLoading(false);
-                          navigate('/checkout');
-                      }
+                  onClose: function(){
+                      snapClosedRef.current = true;
+                      // Jangan lakukan cancel otomatis atau redirect, biarkan user di halaman saat ini
                   }
               });
           } else {
-              alert("Sistem pembayaran (payment gateway) gagal dimuat.");
+              alert('Sistem pembayaran (payment gateway) gagal dimuat.');
           }
       } catch (error) {
           console.error("Checkout failed", error);
@@ -256,6 +261,51 @@ export default function Checkout() {
         </div>
         
         <h1 className="mb-8 text-3xl font-heading text-primary">Checkout</h1>
+
+        {/* [SANDBOX] Floating button di ATAS popup Midtrans — z-index 99999 */}
+        {pendingTransactionId && (
+          <div
+            style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', zIndex: 99999 }}
+          >
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#1a1a2e', borderRadius: '16px', padding: '12px 18px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+              <span style={{ color: '#fbbf24', fontSize: '13px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🧪 Sandbox Mode</span>
+              <button
+                onClick={async () => {
+                  const tid = pendingTransactionId;
+                  setPendingTransactionId(null);
+                  snapClosedRef.current = true; // Tandai agar onSuccess tidak override
+                  setLoading(true);
+                  try {
+                    await api.post(`/transactions/${tid}/simulate-payment`);
+                    snapClosedRef.current = false;
+                    navigate(`/payment-success?order_id=ORDER-${tid}&transaction_status=settlement`);
+                  } catch (err) {
+                    snapClosedRef.current = false;
+                    alert('Simulasi gagal: ' + (err.response?.data?.message || err.message));
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                style={{ background: '#22c55e', color: 'white', fontWeight: 'bold', padding: '8px 16px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '13px', whiteSpace: 'nowrap' }}
+              >
+                {loading ? 'Memproses...' : '✓ Cek Status / Bayar'}
+              </button>
+              <button
+                onClick={() => {
+                  const tid = pendingTransactionId;
+                  setPendingTransactionId(null);
+                  snapClosedRef.current = true;
+                  api.post(`/transactions/${tid}/cancel-pending`).catch(() => {});
+                  navigate('/checkout');
+                }}
+                style={{ background: '#ef4444', color: 'white', fontWeight: 'bold', padding: '8px 14px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '13px', whiteSpace: 'nowrap' }}
+              >
+                ✕ Batalkan
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-8 md:grid-cols-5">
             {/* Left Column */}

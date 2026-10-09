@@ -389,6 +389,7 @@ const syncTransactionStatus = async (transactionId) => {
 
     if (transaction.status !== status) {
         await transaction.update({ status });
+        await transaction.reload(); // pastikan instance terbaru dikembalikan
         try {
             const statusLabel = status === 'paid' ? 'LUNAS' : (status === 'failed' ? 'GAGAL' : status.toUpperCase());
             await createNotification({
@@ -779,5 +780,47 @@ module.exports = {
     deleteTransaction,
     getAnalyticsData,
     cancelPendingTransaction,
-    cancelCustomerTransaction
+    cancelCustomerTransaction,
+    simulatePaymentSuccess
 };
+
+/**
+ * [SANDBOX ONLY] Simulasi pembayaran berhasil tanpa melewati gateway Midtrans.
+ * Langsung update status transaksi menjadi 'paid' di database.
+ */
+async function simulatePaymentSuccess(transactionId, userId) {
+    const transaction = await Transaction.findOne({
+        where: { id: transactionId, user_id: userId }
+    });
+
+    if (!transaction) {
+        throw new NotFoundError('Transaksi tidak ditemukan');
+    }
+
+    if (transaction.status !== 'pending') {
+        throw new BadRequestError('Hanya transaksi berstatus pending yang dapat disimulasikan');
+    }
+
+    await transaction.update({ status: 'paid' });
+
+    try {
+        await createNotification({
+            userId: transaction.user_id,
+            title: 'Pembayaran Berhasil! 🎉',
+            message: `Pembayaran untuk pesanan #ORD-${transaction.id.slice(-8)} telah dikonfirmasi.`,
+            type: 'payment'
+        });
+    } catch (notifErr) {
+        console.error('Failed to create notification on simulate payment:', notifErr);
+    }
+
+    // Emit real-time event to admin
+    if (global.io) {
+        global.io.to('room_admin').emit('new_order', {
+            message: `Pembayaran baru masuk untuk pesanan #ORD-${transaction.id.slice(-8)}`,
+            transactionId: transaction.id
+        });
+    }
+
+    return transaction;
+}

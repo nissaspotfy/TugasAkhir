@@ -9,7 +9,8 @@ const {
     deleteTransaction,
     getAnalyticsData,
     cancelPendingTransaction,
-    cancelCustomerTransaction
+    cancelCustomerTransaction,
+    simulatePaymentSuccess
 } = require('../../services/transaction/transaction');
 
 const createTransactionController = async (req, res, next) => {
@@ -154,6 +155,22 @@ const cancelCustomerTransactionController = async (req, res, next) => {
     }
 };
 
+const simulatePaymentSuccessController = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await simulatePaymentSuccess(id, req.user.id);
+        return res.status(StatusCodes.OK).json(
+            new BaseResponse({
+                status: StatusCodes.OK,
+                message: '[SANDBOX] Pembayaran berhasil disimulasikan',
+                data: result,
+            })
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createTransactionController,
     getUserTransactionsController,
@@ -163,5 +180,6 @@ module.exports = {
     deleteTransactionController,
     getAnalyticsController,
     cancelPendingTransactionController,
-    cancelCustomerTransactionController
+    cancelCustomerTransactionController,
+    simulatePaymentSuccessController
 };

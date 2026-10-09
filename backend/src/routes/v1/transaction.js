@@ -9,7 +9,8 @@ const {
     deleteTransactionController,
     getAnalyticsController,
     cancelPendingTransactionController,
-    cancelCustomerTransactionController
+    cancelCustomerTransactionController,
+    simulatePaymentSuccessController
 } = require('../../controller/transaction/transaction');
 const { authMiddleware, adminMiddleware } = require('../../middlewares/authorization');
 const { checkStoreHours } = require('../../middlewares/storeHours');
@@ -20,6 +21,7 @@ router.get('/analytics', [authMiddleware, adminMiddleware], getAnalyticsControll
 router.post('/:id/sync', authMiddleware, syncTransactionStatusController);
 router.post('/:id/cancel-pending', authMiddleware, cancelPendingTransactionController);
 router.post('/:id/cancel-customer', authMiddleware, cancelCustomerTransactionController);
+router.post('/:id/simulate-payment', authMiddleware, simulatePaymentSuccessController);
 
 router.get('/', [authMiddleware, adminMiddleware], getAllTransactionsController);
 router.put('/:id', [authMiddleware, adminMiddleware], updateTransactionStatusController);

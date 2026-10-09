@@ -374,11 +374,13 @@ function FeatureItem({ icon, text }) {
 }
 
 const isStoreClosed = () => {
-  const now = new Date();
-  const options = { timeZone: 'Asia/Jakarta', hour: '2-digit', hour12: false };
-  const formatter = new Intl.DateTimeFormat('en-US', options);
-  const hour = parseInt(formatter.format(now), 10);
-  return hour < 8 || hour >= 19;
+  // [BYPASS] Toko dibuka 24 jam untuk testing
+  return false;
+  // const now = new Date();
+  // const options = { timeZone: 'Asia/Jakarta', hour: '2-digit', hour12: false };
+  // const formatter = new Intl.DateTimeFormat('en-US', options);
+  // const hour = parseInt(formatter.format(now), 10);
+  // return hour < 8 || hour >= 19;
 };
 
 function ProductCard({ product, onAddToCart }) {
