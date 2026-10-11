@@ -34,7 +34,7 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       }
-    ], {});
+    ], { ignoreDuplicates: true });
   },
 
   async down (queryInterface, Sequelize) {
