@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const express = require('express');
 const morgan = require('morgan');
@@ -65,7 +66,7 @@ app.use(morgan('dev'));
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '../public')));
 
 swaggerSetup(app);
 

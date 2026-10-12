@@ -1,7 +1,14 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-const sslConfig = process.env.DB_SSL === 'true' ? {
+const isAiven = Boolean(
+  (process.env.DB_HOST && process.env.DB_HOST.includes('aivencloud.com')) ||
+  (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('aivencloud.com'))
+);
+
+const requireSSL = process.env.DB_SSL === 'true' || isAiven;
+
+const sslConfig = requireSSL ? {
   dialectOptions: {
     ssl: {
       require: true,
@@ -10,32 +17,26 @@ const sslConfig = process.env.DB_SSL === 'true' ? {
   }
 } : {};
 
+const dbConfig = {
+  username: process.env.DB_USERNAME || process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE || process.env.DB_NAME,
+  host: process.env.DB_HOST || 'localhost',
+  port: Number(process.env.DB_PORT) || 3306,
+  dialect: process.env.DB_DIALECT || 'mysql',
+  logging: process.env.DB_LOGS === 'true' ? console.log : false,
+  timezone: process.env.DB_TIMEZONE || '+07:00',
+  ...sslConfig
+};
+
 module.exports = {
   development: {
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: process.env.DB_DIALECT,
-    ...sslConfig
+    ...dbConfig
   },
   test: {
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: process.env.DB_DIALECT,
-    ...sslConfig
+    ...dbConfig
   },
   production: {
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: process.env.DB_DIALECT,
-    ...sslConfig
+    ...dbConfig
   },
 };

@@ -1,0 +1,10 @@
+{
+  "name": "tugas-akhir-root",
+  "version": "1.0.0",
+  "description": "Root workspace proxy for deployment",
+  "main": "backend/src/index.js",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev"
+  }
+}
