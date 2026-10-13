@@ -6,8 +6,18 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash('password123', salt);
+    const adminHashedPassword = await bcrypt.hash('admin123', salt);
 
     await queryInterface.bulkInsert('users', [
+      {
+        id: '1f816432-f7b4-4e3a-9c7a-8727276568a1',
+        name: 'Admin D\'raosan',
+        email: 'admin@draosan.com',
+        password: adminHashedPassword,
+        role_id: '1f816432-f7b4-4e3a-9c7a-8727276568d1', // Admin Role
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
       {
         id: '3f816432-f7b4-4e3a-9c7a-8727276568d3',
         name: 'Demo User',
